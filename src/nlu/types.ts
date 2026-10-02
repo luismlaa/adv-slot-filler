@@ -15,6 +15,9 @@ export const intentSchema = z.enum([
   "opt_out",
   "opt_in",
   "help",
+  "prices",
+  "hours",
+  "location",
   "unknown",
 ]);
 export type Intent = z.infer<typeof intentSchema>;

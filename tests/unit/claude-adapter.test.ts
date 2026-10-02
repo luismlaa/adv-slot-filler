@@ -76,4 +76,20 @@ describe("Claude como respaldo del intérprete", () => {
     await composite.interpret("eso que hablamos la otra vez pero con el otro", catalog);
     expect(calls).toBe(1);
   });
+
+  it("pasado el tope diario solo usa reglas, y al día siguiente vuelve a consultar", async () => {
+    let calls = 0;
+    const counting: typeof fetch = async (...args) => {
+      calls += 1;
+      return reply(valid)(...args);
+    };
+    let now = Date.parse("2026-10-01T12:00:00Z");
+    const composite = createCompositeProvider(provider(counting), { dailyLimit: 1, now: () => now });
+    const vague = "eso que hablamos la otra vez pero con el otro";
+    expect((await composite.interpret(vague, catalog)).source).toBe("claude");
+    expect((await composite.interpret(vague, catalog)).source).toBe("rules");
+    now += 24 * 3_600_000;
+    await composite.interpret(vague, catalog);
+    expect(calls).toBe(2);
+  });
 });

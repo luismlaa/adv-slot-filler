@@ -12,6 +12,9 @@ import {
   confirmationMessage,
   formatDay,
   helpMessage,
+  hoursMessage,
+  locationMessage,
+  pricesMessage,
   resolveChoice,
   restoreState,
 } from "@/domain/conversation";
@@ -176,6 +179,12 @@ async function decide(turn: Turn): Promise<Outcome> {
       return joinWaitlist(turn, mergeRequest({}, it));
     case "thanks":
       return { reply: MESSAGES.thanks, next: IDLE };
+    case "prices":
+      return { reply: pricesMessage(copy, it.entities.serviceId), next: state };
+    case "hours":
+      return { reply: hoursMessage(copy), next: state };
+    case "location":
+      return { reply: locationMessage(copy), next: state };
     case "greeting":
     case "help":
       return { reply: helpMessage(copy, client.name), next: IDLE };

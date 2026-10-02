@@ -78,6 +78,17 @@ describe("guion de pitch de punta a punta", () => {
 });
 
 describe("conversación — casos de borde", () => {
+  it("responde lo del día a día: precios, horario y ubicación, sin perder el hilo", async () => {
+    const app = buildTestApp();
+    const price = await handleInbound(app.ctx, inbound(PERSONAS.ana.phone, "¿Cuánto cuesta el fade?"));
+    expect(price.replies[0]).toMatch(/RD\$/);
+    const hours = await handleInbound(app.ctx, inbound(PERSONAS.ana.phone, "¿A qué hora abren?"));
+    expect(hours.replies[0]).toMatch(/Nuestro horario/);
+    expect(hours.replies[0]).toMatch(/Lunes: cerrado/);
+    const where = await handleInbound(app.ctx, inbound(PERSONAS.ana.phone, "¿dónde queda?"));
+    expect(where.replies[0]).toMatch(/Piantini/);
+  });
+
   it("cancelar pide confirmación y al confirmar abre el hueco", async () => {
     const app = buildTestApp();
     const ask = await handleInbound(app.ctx, inbound(PERSONAS.juan.phone, "no voy a poder ir el sábado"));

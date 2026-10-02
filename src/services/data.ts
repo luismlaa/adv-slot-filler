@@ -44,7 +44,7 @@ export async function loadCycles(ctx: AppContext): Promise<ClientCycle[]> {
 
 export async function copyContext(ctx: AppContext): Promise<CopyContext> {
   const [salon, staff, services] = await Promise.all([ctx.store.salon.get(), ctx.store.staff.list(), ctx.store.services.list()]);
-  return { salonName: salon.name, timezone: salon.timezone, today: localDateOf(ctx.clock.now(), salon.timezone), staff, services };
+  return { salonName: salon.name, address: salon.address, currency: salon.currency, timezone: salon.timezone, today: localDateOf(ctx.clock.now(), salon.timezone), staff, services };
 }
 
 export function publish(ctx: AppContext, type: DomainEventType, payload: Record<string, unknown> = {}): void {

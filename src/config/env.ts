@@ -30,6 +30,7 @@ export const envSchema = z
     ANTHROPIC_API_KEY: optionalString,
     CLAUDE_MODEL: z.string().default("claude-opus-5-5"),
     LLM_TIMEOUT_MS: z.coerce.number().int().positive().default(8000),
+    LLM_DAILY_LIMIT: z.coerce.number().int().positive().default(300),
 
     MESSAGING_CHANNEL: z.enum(["simulator", "whatsapp"]).default("simulator"),
     MESSAGING_DRY_RUN: flag,

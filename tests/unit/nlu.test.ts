@@ -105,6 +105,13 @@ const CORPUS: Case[] = [
   ["Hola!", "greeting"],
   ["buenas tardes", "greeting"],
   ["klk", "greeting"],
+  ["¿Cuánto cuesta el fade?", "prices"],
+  ["a cómo está el corte", "prices"],
+  ["qué precio tiene la barba", "prices"],
+  ["¿A qué hora abren?", "hours"],
+  ["hasta qué hora trabajan los sábados", "hours"],
+  ["¿Dónde queda la barbería?", "location"],
+  ["mándame la dirección", "location"],
   ["cómo funciona esto?", "help"],
   ["jajaja", "unknown"],
 ];

@@ -1,8 +1,8 @@
-import { expect, test } from "@playwright/test";
+import { type Page, expect, test } from "@playwright/test";
 
 /**
- * Recorre el guion de pitch completo sobre la build de producción, offline:
- * los mismos clics que hará el presentador en /demo.
+ * Recorre el pitch completo sobre la build de producción, offline, igual que el presentador:
+ * escribe como cliente en `/chat` (WhatsApp) y muestra el salón en las pantallas reales.
  */
 test.describe("demo de pitch", () => {
   test.beforeEach(async ({ request }) => {
@@ -10,40 +10,58 @@ test.describe("demo de pitch", () => {
     expect(reset.ok()).toBe(true);
   });
 
-  test("las 5 escenas funcionan de principio a fin", async ({ page }) => {
-    await page.goto("/demo");
-    const phone = page.locator("[aria-live=polite]");
-    const note = page.getByRole("status").filter({ hasText: /./ }).last();
-    const step = async (label: string) => {
-      await page.getByRole("button", { name: label, exact: true }).click();
-      await expect(page.getByRole("button", { name: `✓ ${label}` })).toBeVisible({ timeout: 20_000 });
-    };
+  const openChat = async (page: Page, name: string) => {
+    await page.goto("/chat");
+    await page.getByRole("link", { name: new RegExp(name) }).click();
+    await expect(page.getByText(`chateas como ${name}`)).toBeVisible();
+    return page.getByRole("main", { name: `Chat de ${name}` });
+  };
+  const say = async (page: Page, text: string) => {
+    await page.getByLabel("Escribe un mensaje").fill(text);
+    await page.getByRole("button", { name: "Enviar" }).click();
+  };
 
-    // 1. Pedro pide a Carlos el sábado: está lleno → alternativas → elige.
-    await step("Pedro escribe");
-    await expect(phone).toContainText("Carlos está lleno el sábado");
-    await expect(page.getByRole("heading", { level: 1, name: /^sáb/i })).toBeVisible();
-    await step("Pedro elige la 1");
-    await expect(phone).toContainText("Listo ✅");
+  test("el pitch completo, escribiendo por WhatsApp", async ({ page }) => {
+    // 1. Pedro pide a Carlos el sábado: está lleno → alternativas → elige con un toque.
+    let chat = await openChat(page, "Pedro Martínez");
+    await say(page, "Klk, quiero un corte con Carlos el sábado");
+    await expect(chat).toContainText("Carlos está lleno el sábado", { timeout: 20_000 });
+    await page.getByRole("button", { name: "la 1" }).click();
+    await expect(chat).toContainText("Listo ✅");
 
-    // 2. Juan cancela → oferta a José → José acepta → hueco lleno.
-    await step("Juan avisa");
-    await expect(phone).toContainText("¿Confirmas que cancelamos");
-    await step("Juan confirma");
-    await expect(phone).toContainText("Se liberó un espacio con Carlos");
-    await step("José acepta");
-    await expect(phone).toContainText("Listo ✅");
-    await expect(note).toContainText("se rellenó solo");
+    // 2. Juan cancela → la oferta le llega sola a José → José acepta.
+    chat = await openChat(page, "Juan Pérez");
+    await say(page, "Mano, no voy a poder ir el sábado 😔");
+    await expect(chat).toContainText("¿Confirmas que cancelamos");
+    await page.getByRole("button", { name: "Sí, dale" }).click();
+    await expect(chat).toContainText("cancelé tu cita");
+    chat = await openChat(page, "José Ramírez");
+    await expect(chat).toContainText("Se liberó un espacio con Carlos");
+    await say(page, "Sí!! Dame ese");
+    await expect(chat).toContainText("Listo ✅");
 
-    // 3. Cuatro semanas después: invitación por ciclo → Pedro dice sí.
-    await step("Avanzar 4 semanas");
-    await expect(phone).toContainText("Ya van 4 semanas de tu último");
-    await step("Pedro dice sí");
-    await expect(page.getByText("🔁 Volvió por su ciclo").first()).toBeVisible();
+    // 3. El salón lo ve en la agenda, sin botones de demo a la vista.
+    await page.goto("/agenda");
+    await expect(page.getByText("espacios libres").first()).toBeVisible();
+    await expect(page.getByText(/Pedro escribe|Juan avisa|Demo en vivo/)).toHaveCount(0);
 
-    // 4. Evento personal en el Google Calendar de Carlos → bloqueo en la agenda.
-    await step("Carlos agenda algo personal");
-    await expect(page.getByText("Cita médica").first()).toBeVisible();
+    // 4. Presentador (tecla «.»): saltar al día en que a Pedro le toca volver.
+    await page.keyboard.press(".");
+    const panel = page.getByRole("complementary", { name: "Presentador" });
+    await panel.getByLabel("Hasta que le toque volver a").selectOption({ label: "Pedro Martínez" });
+    await panel.getByRole("button", { name: "Ir" }).last().click();
+    chat = await openChat(page, "Pedro Martínez");
+    await expect(chat).toContainText("Ya van 4 semanas de tu último", { timeout: 20_000 });
+    await page.getByRole("button", { name: "Sí, dale" }).click();
+    await expect(chat).toContainText("Listo ✅");
+    // La cita que propuso la invitación aparece en la agenda marcada como regreso por ciclo.
+    await page.goto("/agenda");
+    const returning = page.getByText("🔁 Volvió por su ciclo").first();
+    for (let day = 0; day < 7 && !(await returning.isVisible().catch(() => false)); day += 1) {
+      await page.getByRole("button", { name: "Día siguiente" }).click();
+      await page.waitForTimeout(400);
+    }
+    await expect(returning).toBeVisible();
 
     // 5. ROI.
     await page.goto("/metricas");
@@ -51,12 +69,14 @@ test.describe("demo de pitch", () => {
     await expect(page.getByText(/RD\$\d/).first()).toBeVisible();
   });
 
-  test("el presentador puede escribir libremente como cliente", async ({ page }) => {
-    await page.goto("/demo");
-    await page.getByRole("tab", { name: "Ana" }).click();
-    await page.getByLabel("Mensaje de Ana Gómez").fill("hola, qué tienen libre el sábado?");
-    await page.getByRole("button", { name: "Enviar" }).click();
-    await expect(page.locator("[aria-live=polite]")).toContainText(/Andrea|espacio|lleno/);
+  test("el agente responde lo del día a día", async ({ page }) => {
+    const chat = await openChat(page, "Ana Gómez");
+    await page.getByRole("button", { name: "¿Cuánto cuesta el fade?" }).click();
+    await expect(chat).toContainText("RD$700");
+    await say(page, "¿dónde queda?");
+    await expect(chat).toContainText("Piantini");
+    await say(page, "hola, qué tienen libre el sábado?");
+    await expect(chat).toContainText(/Andrea|espacio|lleno/);
   });
 
   test("las pantallas del salón cargan", async ({ page }) => {
@@ -67,6 +87,7 @@ test.describe("demo de pitch", () => {
       ["/metricas", "Lo que Slot Filler le devolvió al salón"],
       ["/ajustes", "Automatización"],
       ["/barbero", "Próximo cliente"],
+      ["/chat", "Elige un cliente"],
     ] as const) {
       await page.goto(path);
       await expect(page.getByText(text).first()).toBeVisible({ timeout: 20_000 });

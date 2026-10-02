@@ -1,13 +1,15 @@
 import type { AllocationReason } from "../allocation";
 import type { LocalDate, Service, Staff } from "../model";
 import { localParts } from "../time";
-import { endSentence, firstNameOf, formatDay, formatTime, formatWhen, optionMarker } from "./format";
+import { endSentence, firstNameOf, formatDay, formatMoney, formatTime, formatWhen, optionMarker } from "./format";
 import type { ConversationState } from "./state";
 
 type Option = Extract<ConversationState, { step: "choosing" }>["options"][number];
 
 export interface CopyContext {
   readonly salonName: string;
+  readonly address?: string;
+  readonly currency?: string;
   readonly timezone: string;
   readonly today: LocalDate;
   readonly staff: readonly Staff[];
@@ -92,7 +94,46 @@ export const cancelledMessage = (ctx: CopyContext, o: { staffId: string; start: 
   `Listo, cancelé tu cita con ${endSentence(`${staffName(ctx, o.staffId)} ${formatWhen(o.start, ctx.timezone, ctx.today)}`)} ¡Gracias por avisar! Le daremos el espacio a alguien en lista de espera. Cuando quieras volver, escríbeme 💈`;
 
 export const helpMessage = (ctx: CopyContext, name?: string) =>
-  `¡Hola${name ? ` ${firstNameOf(name)}` : ""}! 👋 Soy el asistente de ${ctx.salonName}. Te puedo apartar una cita, decirte qué hay libre o cancelar.\nEscríbeme como hablas, por ejemplo: «quiero un fade con ${staffName(ctx, ctx.staff[0]?.id ?? "")} el sábado en la tarde».`;
+  `¡Hola${name ? ` ${firstNameOf(name)}` : ""}! 👋 Te saluda ${ctx.salonName}. ¿En qué te ayudo? Te puedo apartar una cita, decirte qué hay libre, los precios o el horario.\nEscríbeme como hablas, por ejemplo: «quiero un fade con ${staffName(ctx, ctx.staff.find((s) => s.active)?.id ?? "")} el sábado en la tarde».`;
+
+/** "Fade / degradado" → "el fade"; "Color / tinte" → "el color". */
+const shortServiceName = (s: Service) => `el ${s.name.split("/")[0]!.trim().toLowerCase()}`;
+
+/** Precios: del servicio que preguntó, o la lista completa si no dijo cuál. */
+export function pricesMessage(ctx: CopyContext, serviceId?: string): string {
+  const money = (s: Service) => formatMoney(s.price, ctx.currency ?? "DOP");
+  const asked = serviceId ? ctx.services.find((s) => s.id === serviceId) : undefined;
+  if (asked) return `${capitalize(shortServiceName(asked))} sale en ${money(asked)} (${asked.durationMinutes} min). ¿Te aparto uno? Dime el día y te digo qué hay 🙂`;
+  const lines = ctx.services.filter((s) => s.active).map((s) => `• ${s.name}: ${money(s)}`);
+  return `Estos son nuestros precios 💈\n${lines.join("\n")}\n\n¿Cuál te hago y para cuándo?`;
+}
+
+const WEEKDAY_NAMES = ["domingo", "lunes", "martes", "miércoles", "jueves", "viernes", "sábado"];
+
+/** Horario del salón: desde la primera entrada hasta la última salida de cualquier estilista, por día. */
+export function hoursMessage(ctx: CopyContext): string {
+  const spans = WEEKDAY_NAMES.map((_, day) => {
+    const ranges = ctx.staff.filter((s) => s.active).flatMap((s) => s.schedule[day] ?? []);
+    if (ranges.length === 0) return undefined;
+    const open = ranges.map((r) => r.start).sort()[0]!;
+    const close = ranges.map((r) => r.end).sort().at(-1)!;
+    return `${formatTime(open)} a ${formatTime(close)}`;
+  });
+  const groups: { from: number; to: number; span: string | undefined }[] = [];
+  for (const day of [1, 2, 3, 4, 5, 6, 0]) {
+    const last = groups.at(-1);
+    if (last && last.span === spans[day] && (last.to + 1) % 7 === day) last.to = day;
+    else groups.push({ from: day, to: day, span: spans[day] });
+  }
+  const label = (g: { from: number; to: number }) => (g.from === g.to ? WEEKDAY_NAMES[g.from]! : `${WEEKDAY_NAMES[g.from]} a ${WEEKDAY_NAMES[g.to]}`);
+  const lines = groups.map((g) => `• ${capitalize(label(g))}: ${g.span ?? "cerrado"}`);
+  return `Nuestro horario 🕘\n${lines.join("\n")}\n\n¿Te busco un espacio?`;
+}
+
+export const locationMessage = (ctx: CopyContext) =>
+  ctx.address
+    ? `Estamos en ${ctx.address} 📍\n¿Te aparto una cita para cuando vengas?`
+    : `Escríbenos y te mandamos la ubicación 📍 ¿Te aparto una cita?`;
 
 export const MESSAGES = {
   unknown: "Disculpa, no te entendí bien 🙏 Puedes escribirme algo como «quiero un corte mañana en la tarde» o «cancelar mi cita».",

@@ -18,7 +18,8 @@ npm run demo
 
 Rutas:
 
-- **http://localhost:4100/demo**: guion de pitch en pantalla dividida (salón + WhatsApp simulado), con reloj simulado y escenarios guiados.
+- **http://localhost:4100/agenda**: el producto tal cual lo usa el salón, con datos seed. La tecla «.» abre el panel del presentador (reloj simulado, saltos de ciclo, calendario de Carlos, reinicio).
+- **http://localhost:4100/chat**: el WhatsApp del cliente. Lo que escribes entra igual que un webhook real y el agente responde como en producción. Ábrelo en el celular para el pitch (`docs/pitch-script.md`).
 - `/agenda`: tablero del salón.
 - `/por-volver`, `/lista-espera`, `/metricas` y `/ajustes`: el resto del panel del salón.
 - `/barbero`: vista móvil del estilista.
