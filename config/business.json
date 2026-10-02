@@ -34,7 +34,7 @@
   "cycles": {
     "minIntervalDays": 5,
     "recencyHalfLife": 3,
-    "shrinkK": 2,
+    "shrinkK": 1,
     "outlierFactor": 2.5,
     "dueWindowBeforeDays": 3,
     "dueWindowAfterDays": 4,

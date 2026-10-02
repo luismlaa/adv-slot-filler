@@ -18,7 +18,7 @@ npm run demo
 
 Rutas:
 
-- **http://localhost:3000/demo**: guion de pitch en pantalla dividida (salón + WhatsApp simulado), con reloj simulado y escenarios guiados.
+- **http://localhost:4100/demo**: guion de pitch en pantalla dividida (salón + WhatsApp simulado), con reloj simulado y escenarios guiados.
 - `/agenda`: tablero del salón.
 - `/por-volver`, `/lista-espera`, `/metricas` y `/ajustes`: el resto del panel del salón.
 - `/barbero`: vista móvil del estilista.
