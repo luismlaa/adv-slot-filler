@@ -31,10 +31,12 @@ const BOARD_EVENTS = [
 interface Props {
   /** En la demo el tablero va más compacto y sin feed lateral. */
   compact?: boolean;
+  /** Día inicial (la demo lo enfoca según la escena; remonta con `key` para cambiarlo). */
+  initialDate?: string;
 }
 
-export function AgendaBoard({ compact = false }: Props) {
-  const [date, setDate] = useState<string>();
+export function AgendaBoard({ compact = false, initialDate }: Props) {
+  const [date, setDate] = useState<string | undefined>(initialDate);
   const board = useLiveQuery<BoardView>(`/api/board${date ? `?date=${date}` : ""}`, BOARD_EVENTS);
   const settings = useLiveQuery<{ services: Service[] }>("/api/settings", ["demo.reset"]);
   const [selected, setSelected] = useState<BoardAppointment>();
@@ -85,7 +87,7 @@ export function AgendaBoard({ compact = false }: Props) {
             <Badge tone="emerald">✨ hueco rellenado</Badge>
           </div>
         </div>
-        <BoardGrid view={view} onAppointment={setSelected} onFreeSlot={setSlot} highlightIds={fresh} />
+        <BoardGrid view={view} onAppointment={setSelected} onFreeSlot={setSlot} highlightIds={fresh} compact={compact} />
       </div>
       {!compact && (
         <Card className="h-fit p-4 xl:sticky xl:top-4">
