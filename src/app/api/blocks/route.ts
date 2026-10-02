@@ -2,7 +2,6 @@ import { z } from "zod";
 import { firstNameOf, formatWhen } from "@/domain/conversation";
 import { idSchema, instantSchema } from "@/domain/model";
 import { fromIso, localDateOf, overlaps, toIso } from "@/domain/time";
-import { getContainer } from "@/lib/container";
 import { HttpError, json, parseBody, salonRoute } from "@/lib/http";
 import { recordActivity } from "@/services/activity";
 import { publish } from "@/services/data";
@@ -14,8 +13,7 @@ const bodySchema = z
   .refine((b) => b.start < b.end, "El bloqueo debe terminar después de empezar");
 
 /** El estilista bloquea tiempo (diligencia, descanso). No se permite encima de citas reservadas. */
-export const POST = salonRoute(async (request: Request) => {
-  const { ctx } = getContainer();
+export const POST = salonRoute(async ({ ctx }, request: Request) => {
   const body = await parseBody(request, bodySchema);
   const interval = { start: fromIso(body.start), end: fromIso(body.end) };
   const booked = await ctx.store.appointments.list({ staffId: body.staffId, from: body.start, to: body.end, statuses: ["booked"] });

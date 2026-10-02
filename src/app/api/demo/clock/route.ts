@@ -17,7 +17,7 @@ const bodySchema = z.union([
  */
 export const POST = route(async (request: Request) => {
   const body = await parseBody(request, bodySchema);
-  const deps = demoDeps();
+  const deps = await demoDeps();
   if ("minutes" in body) return json(await advanceClock(deps, body.minutes * 60_000));
   const client = await deps.ctx.store.clients.findByPhone(body.untilCycleOf);
   if (!client) throw new HttpError(404, "Ese cliente todavía no tiene historial en el salón");

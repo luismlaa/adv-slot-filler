@@ -6,8 +6,8 @@ export const dynamic = "force-dynamic";
 export async function GET() {
   const started = Date.now();
   try {
-    const { env, ctx } = getContainer();
-    await ctx.store.salon.get();
+    const { env, directory } = getContainer();
+    await directory.ping();
     return Response.json(
       {
         status: "ok",

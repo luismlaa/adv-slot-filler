@@ -1,7 +1,7 @@
 import "server-only";
 import { ZodError, type z } from "zod";
-import { requireSalonMember } from "./auth";
-import { getContainer } from "./container";
+import { type SalonMember, requireSalonMember } from "./auth";
+import { type SalonScope, getContainer } from "./container";
 import { HttpError } from "./http-error";
 
 export { HttpError };
@@ -27,18 +27,29 @@ export function route<Args extends unknown[]>(handler: (...args: Args) => Promis
     } catch (error) {
       if (error instanceof ZodError) return json({ error: "Datos inválidos", issues: error.issues.map((i) => ({ path: i.path.join("."), message: i.message })) }, 400);
       if (error instanceof HttpError) return json({ error: error.message }, error.status);
-      getContainer().ctx.logger.error("Error no controlado en API", { error: error instanceof Error ? error.message : String(error) });
+      getContainer().logger.error("Error no controlado en API", { error: error instanceof Error ? error.message : String(error) });
       return json({ error: "Error interno" }, 500);
     }
   };
 }
 
-/** Igual que `route`, pero exige un miembro del salón con sesión (en producción). */
-export function salonRoute<Args extends unknown[]>(handler: (...args: Args) => Promise<Response>) {
-  return route(async (...args: Args) => {
-    await requireSalonMember();
-    return handler(...args);
-  });
+export interface SalonRequestScope extends SalonScope {
+  /** Usuario que hace la petición (`undefined` en la demo, que no tiene usuarios). */
+  readonly member: SalonMember | undefined;
+}
+
+/** Contexto del salón de quien hace la petición: su membresía decide el salón. */
+export async function requestScope(): Promise<SalonRequestScope> {
+  const member = await requireSalonMember();
+  const container = getContainer();
+  const salonId = member?.salonId ?? (await container.directory.activeSalonIds())[0];
+  if (!salonId) throw new HttpError(404, "No hay ningún salón configurado");
+  return { ...(await container.forSalon(salonId)), member };
+}
+
+/** Igual que `route`, pero exige un miembro del salón con sesión y entrega el contexto de SU salón. */
+export function salonRoute<Args extends unknown[]>(handler: (scope: SalonRequestScope, ...args: Args) => Promise<Response>) {
+  return route(async (...args: Args) => handler(await requestScope(), ...args));
 }
 
 /** Rutas que solo existen en modo demo (reloj simulado, reset, teléfono simulado). */

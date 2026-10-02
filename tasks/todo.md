@@ -84,8 +84,8 @@ Modo: single-instance. Ramas apiladas por fase; merge humano en orden.
 - [x] e2e y unit reescritos; `docs/pitch-script.md`
 
 ## PR2 — Multi-tenant · `feat/multi-tenant`
-- [ ] Contexto por salón, auth por membresía, webhook por phone_number_id, crons por salón
-- [ ] Migración (slug, active, whatsapp_phone_number_id) + `salon:create` + test de aislamiento
+- [x] Contexto por salón, auth por membresía, webhook por phone_number_id, crons por salón
+- [x] Migración (slug, active, whatsapp_phone_number_id) + `salon:create` + test de aislamiento
 
 ## PR3 — Infra de deploy · `chore/deploy-readiness`
 - [ ] Entornos staging/prod, CD, observabilidad, backups, páginas legales, runbook

@@ -16,6 +16,7 @@
     "check": "npm run typecheck && npm run lint && npm test",
     "db:seed": "tsx scripts/seed-supabase.ts",
     "import:csv": "tsx scripts/import-csv.ts",
+    "salon:create": "tsx scripts/salon-create.ts",
     "cf:build": "opennextjs-cloudflare build",
     "cf:preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
     "cf:deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy"
@@ -33,6 +34,7 @@
     "zod": "^4.6.5"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "^0.5.8",
     "@opennextjs/cloudflare": "^1.20.8",
     "@playwright/test": "^1.63.0",
     "@tailwindcss/postcss": "^4",

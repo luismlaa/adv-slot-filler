@@ -1,13 +1,12 @@
 import { serviceSchema } from "@/domain/model";
-import { getContainer } from "@/lib/container";
 import { HttpError, json, parseBody, salonRoute } from "@/lib/http";
 import { saveService } from "@/services/settings";
 
 export const dynamic = "force-dynamic";
 
-export const PUT = salonRoute(async (request: Request, context: RouteContext<"/api/services/[id]">) => {
+export const PUT = salonRoute(async ({ ctx }, request: Request, context: RouteContext<"/api/services/[id]">) => {
   const { id } = await context.params;
   const body = await parseBody(request, serviceSchema);
   if (body.id !== id) throw new HttpError(400, "El id no coincide");
-  return json(await saveService(getContainer().ctx, body));
+  return json(await saveService(ctx, body));
 });

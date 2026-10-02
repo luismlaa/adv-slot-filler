@@ -12,6 +12,10 @@ export const salonSchema = z.object({
   currency: z.string().length(3),
   phone: phoneSchema.optional(),
   address: z.string().optional(),
+  slug: z.string().optional(),
+  active: z.boolean().default(true),
+  /** Número de WhatsApp Business del salón (Meta `phone_number_id`); todos bajo la misma app. */
+  whatsappPhoneNumberId: z.string().optional(),
   /** Overrides de `config/business.json` específicos de este salón. */
   settings: z.record(z.string(), z.unknown()).default({}),
 });

@@ -7,8 +7,8 @@ import { recordActivity } from "@/services/activity";
 export const dynamic = "force-dynamic";
 
 /** Vuelta de Google: valida el `state` contra la cookie (anti-CSRF), guarda el refresh token y sincroniza. */
-export const GET = salonRoute(async (request: Request) => {
-  const { env, ctx, calendarSync } = getContainer();
+export const GET = salonRoute(async ({ ctx, calendarSync }, request: Request) => {
+  const { env } = getContainer();
   if (env.CALENDAR_PROVIDER !== "google") throw new HttpError(404, "Google Calendar no está configurado");
   const params = new URL(request.url).searchParams;
   const [nonce, staffId] = (params.get("state") ?? "").split(".");

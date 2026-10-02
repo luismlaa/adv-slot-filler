@@ -52,13 +52,26 @@ export function createSupabaseStore(db: SupabaseClient, salonId: string): Store 
   };
   const MONEY = ["price"];
 
+  /**
+   * Upsert acotado al salón. El service role salta RLS, así que un `upsert` por id podría pisar la fila
+   * de OTRO salón con un id ajeno. Primero se actualiza solo si la fila es de este salón; si no existe,
+   * se inserta — y si el id es de otro salón, el insert choca con la clave primaria y falla.
+   */
+  const scopedUpsert = async (name: (typeof TABLES)[keyof typeof TABLES], row: Row, key: string, what: string): Promise<Row> => {
+    if (row.salon_id !== salonId) throw new Error(`Supabase (${what}): la fila no pertenece a este salón`);
+    const updated = await table(name).update(row).eq("salon_id", salonId).eq(key, row[key] as string).select().maybeSingle();
+    if (updated.error) throw new Error(`Supabase (${what}): ${updated.error.message}`);
+    if (updated.data) return updated.data as Row;
+    return unwrap(await table(name).insert(row).select().single(), what) as Row;
+  };
+
   return {
     salonId,
 
     salon: {
-      get: async () => fromRow(salonSchema, unwrap(await table(TABLES.salons).select("id,name,timezone,currency,phone,address,settings").eq("id", salonId).single(), "salon")),
+      get: async () => fromRow(salonSchema, unwrap(await table(TABLES.salons).select("id,name,timezone,currency,phone,address,settings,slug,active,whatsapp_phone_number_id").eq("id", salonId).single(), "salon")),
       updateSettings: async (settings) =>
-        fromRow(salonSchema, unwrap(await table(TABLES.salons).update({ settings }).eq("id", salonId).select("id,name,timezone,currency,phone,address,settings").single(), "salon.update")),
+        fromRow(salonSchema, unwrap(await table(TABLES.salons).update({ settings }).eq("id", salonId).select("id,name,timezone,currency,phone,address,settings,slug,active,whatsapp_phone_number_id").single(), "salon.update")),
     },
 
     specialties: {
@@ -67,12 +80,12 @@ export function createSupabaseStore(db: SupabaseClient, salonId: string): Store 
 
     staff: {
       list: () => many(staffSchema, scoped(TABLES.staff).order("name"), "staff"),
-      upsert: async (s) => fromRow(staffSchema, unwrap(await table(TABLES.staff).upsert(toRow(s)).select().single(), "staff.upsert")),
+      upsert: async (s) => fromRow(staffSchema, await scopedUpsert(TABLES.staff, toRow(s), "id", "staff.upsert")),
     },
 
     services: {
       list: () => many(serviceSchema, scoped(TABLES.services).order("name"), "services", MONEY),
-      upsert: async (s) => fromRow(serviceSchema, unwrap(await table(TABLES.services).upsert(toRow(s)).select().single(), "services.upsert"), MONEY),
+      upsert: async (s) => fromRow(serviceSchema, await scopedUpsert(TABLES.services, toRow(s), "id", "services.upsert"), MONEY),
     },
 
     clients: {
@@ -118,7 +131,7 @@ export function createSupabaseStore(db: SupabaseClient, salonId: string): Store 
         if (filter.staffId !== undefined) q = q.eq("staff_id", filter.staffId);
         return many(blockSchema, q.order("start_at"), "blocks.list");
       },
-      upsert: async (b) => fromRow(blockSchema, unwrap(await table(TABLES.blocks).upsert(toRow(b)).select().single(), "blocks.upsert")),
+      upsert: async (b) => fromRow(blockSchema, await scopedUpsert(TABLES.blocks, toRow(b), "id", "blocks.upsert")),
       delete: async (id) => {
         const { error } = await table(TABLES.blocks).delete().eq("salon_id", salonId).eq("id", id);
         if (error) throw new Error(`Supabase (blocks.delete): ${error.message}`);
@@ -205,7 +218,7 @@ export function createSupabaseStore(db: SupabaseClient, salonId: string): Store 
     calendarLinks: {
       list: () => many(calendarLinkSchema, scoped(TABLES.calendarLinks), "calendarLinks.list"),
       get: (staffId) => maybeOne(calendarLinkSchema, scoped(TABLES.calendarLinks).eq("staff_id", staffId).maybeSingle(), "calendarLinks.get"),
-      upsert: async (link) => fromRow(calendarLinkSchema, unwrap(await table(TABLES.calendarLinks).upsert(toRow(link)).select().single(), "calendarLinks.upsert")),
+      upsert: async (link) => fromRow(calendarLinkSchema, await scopedUpsert(TABLES.calendarLinks, toRow(link), "staff_id", "calendarLinks.upsert")),
     },
 
     activity: {

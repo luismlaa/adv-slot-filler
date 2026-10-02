@@ -38,6 +38,7 @@ const webhookSchema = z.object({
       changes: z.array(
         z.object({
           value: z.object({
+            metadata: z.object({ phone_number_id: z.string() }).optional(),
             contacts: z.array(z.object({ wa_id: z.string(), profile: z.object({ name: z.string() }).optional() })).optional(),
             messages: z.array(messageSchema).optional(),
           }),
@@ -47,17 +48,23 @@ const webhookSchema = z.object({
   ),
 });
 
+export interface InboundBatch {
+  /** Número de WhatsApp Business que recibió los mensajes: identifica al salón. */
+  readonly phoneNumberId: string | undefined;
+  readonly messages: InboundMessage[];
+}
+
 /**
- * Extrae los mensajes entrantes de un webhook. Ignora estados (sent/delivered/read) y
- * tipos sin texto (audio, imagen) — esos se responden pidiendo texto en el servicio.
+ * Extrae los mensajes entrantes de un webhook, agrupados por número del negocio (cada salón tiene
+ * el suyo). Ignora estados (sent/delivered/read) y tipos sin texto (audio, imagen).
  */
-export function parseWebhook(payload: unknown): InboundMessage[] {
+export function parseWebhookBatches(payload: unknown): InboundBatch[] {
   const parsed = webhookSchema.safeParse(payload);
   if (!parsed.success) return [];
   return parsed.data.entry.flatMap((entry) =>
-    entry.changes.flatMap((change) => {
+    entry.changes.map((change) => {
       const names = new Map((change.value.contacts ?? []).map((c) => [c.wa_id, c.profile?.name]));
-      return (change.value.messages ?? []).flatMap((m): InboundMessage[] => {
+      const messages = (change.value.messages ?? []).flatMap((m): InboundMessage[] => {
         const text = m.text?.body ?? m.button?.text ?? m.interactive?.button_reply?.title ?? m.interactive?.list_reply?.title;
         if (text === undefined) return [];
         return [
@@ -70,6 +77,10 @@ export function parseWebhook(payload: unknown): InboundMessage[] {
           },
         ];
       });
+      return { phoneNumberId: change.value.metadata?.phone_number_id, messages };
     }),
   );
 }
+
+/** Todos los mensajes entrantes del webhook, sin importar el número que los recibió. */
+export const parseWebhook = (payload: unknown): InboundMessage[] => parseWebhookBatches(payload).flatMap((b) => b.messages);

@@ -6,8 +6,8 @@ import { HttpError, salonRoute } from "@/lib/http";
 export const dynamic = "force-dynamic";
 
 /** Inicia el consentimiento OAuth para el calendario de un estilista. Fase D3 (requiere app verificada). */
-export const GET = salonRoute(async (request: Request) => {
-  const { env, ctx } = getContainer();
+export const GET = salonRoute(async ({ ctx }, request: Request) => {
+  const { env } = getContainer();
   if (env.CALENDAR_PROVIDER !== "google") throw new HttpError(404, "Google Calendar no está configurado");
   const staffId = new URL(request.url).searchParams.get("staffId");
   const staff = await ctx.store.staff.list();
