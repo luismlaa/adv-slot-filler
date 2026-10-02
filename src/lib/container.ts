@@ -87,7 +87,7 @@ function buildContainer(): Container {
 
   const nlu =
     env.LLM_PROVIDER === "claude"
-      ? createCompositeProvider(createClaudeProvider({ apiKey: env.ANTHROPIC_API_KEY!, model: env.CLAUDE_MODEL, timeoutMs: env.LLM_TIMEOUT_MS, logger }))
+      ? createCompositeProvider(createClaudeProvider({ apiKey: env.ANTHROPIC_API_KEY!, model: env.CLAUDE_MODEL, timeoutMs: env.LLM_TIMEOUT_MS, logger }), { dailyLimit: env.LLM_DAILY_LIMIT })
       : rulesProvider;
 
   const calendarProvider: CalendarProvider =

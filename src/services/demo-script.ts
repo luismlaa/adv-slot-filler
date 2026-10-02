@@ -1,14 +1,13 @@
 import type { FakeCalendarProvider } from "@/adapters/calendar/fake";
-import { PERSONAS, type PersonaKey } from "@/adapters/memory/seed";
+import { PERSONAS } from "@/adapters/memory/seed";
 import { createRng } from "@/adapters/memory/seed/rng";
 import { staffCanPerform } from "@/domain/model";
 import { DAY, MINUTE, addDaysToDate, candidateStarts, localDateOf, toIso, utilization, zonedInstant } from "@/domain/time";
 import type { CalendarSync } from "./calendar-sync";
 import type { AppContext } from "./context";
 import { handleInbound } from "./conversation";
-import { publish } from "./data";
+import { loadCycles, publish } from "./data";
 import { type TickReport, tick } from "./jobs";
-import { boardView } from "./views/board";
 
 export interface DemoDeps {
   readonly ctx: AppContext;
@@ -17,15 +16,6 @@ export interface DemoDeps {
   readonly calendarSync: CalendarSync;
   readonly calendarId: string;
   readonly calendarStaffId: string;
-}
-
-export interface StepResult {
-  /** Día que el tablero debe mostrar después del paso. */
-  readonly focusDate?: string;
-  /** Teléfono que el simulador debe mostrar. */
-  readonly persona?: PersonaKey;
-  readonly note: string;
-  readonly tick?: TickReport;
 }
 
 let inboundSeq = 0;
@@ -126,76 +116,20 @@ export async function advanceClock(deps: DemoDeps, ms: number): Promise<TickRepo
   return report;
 }
 
-async function saturday(ctx: AppContext) {
-  const salon = await ctx.store.salon.get();
-  const today = localDateOf(ctx.clock.now(), salon.timezone);
-  const weekday = new Date(`${today}T12:00:00Z`).getUTCDay();
-  return addDaysToDate(today, (6 - weekday + 7) % 7 || 7);
-}
-
-export const STEP_IDS = [
-  "pedro-ask",
-  "pedro-choose",
-  "juan-cancel",
-  "juan-confirm",
-  "jose-accept",
-  "jump-to-pedro-cycle",
-  "pedro-yes",
-  "carlos-google-event",
-] as const;
-export type StepId = (typeof STEP_IDS)[number];
-
-/** Los pasos del guion de pitch. Cada uno usa los mismos casos de uso que producción. */
-export async function runStep(deps: DemoDeps, step: StepId): Promise<StepResult> {
+/**
+ * Avanza el reloj hasta la mañana (10:05) del día en que a un cliente le toca volver según su
+ * ciclo real: así el presentador muestra la invitación «ya te toca» sin calcular fechas a mano.
+ */
+export async function advanceToClientCycle(deps: DemoDeps, clientId: string): Promise<{ date: string; tick: TickReport }> {
   const { ctx } = deps;
-  const sat = await saturday(ctx);
-  switch (step) {
-    case "pedro-ask":
-      await simulateInbound(ctx, PERSONAS.pedro.phone, "Klk, quiero un corte con Carlos el sábado");
-      return { persona: "pedro", focusDate: sat, note: "Carlos está lleno el sábado: el sistema ofrece el hueco más cercano con Carlos u otro barbero que también hace fade." };
-    case "pedro-choose":
-      await simulateInbound(ctx, PERSONAS.pedro.phone, "la 1");
-      return { persona: "pedro", note: "Pedro elige y queda reservado. Aparece en la agenda en vivo." };
-    case "juan-cancel":
-      await simulateInbound(ctx, PERSONAS.juan.phone, "Mano, no voy a poder ir el sábado 😔");
-      return { persona: "juan", focusDate: sat, note: "Juan avisa por WhatsApp que no puede venir. El asistente confirma antes de cancelar." };
-    case "juan-confirm":
-      await simulateInbound(ctx, PERSONAS.juan.phone, "sí");
-      return { persona: "jose", focusDate: sat, note: "Se libera el hueco del sábado 4:00 p. m. y sale la oferta a la lista de espera (José) y a clientes a los que les toca volver." };
-    case "jose-accept":
-      await simulateInbound(ctx, PERSONAS.jose.phone, "Sí!! Dame ese");
-      return { persona: "jose", focusDate: sat, note: "José responde primero y se queda con el espacio. El hueco se rellenó solo, sin que nadie en el salón tocara nada." };
-    case "jump-to-pedro-cycle": {
-      const visits = await ctx.store.appointments.list({ clientId: PERSONAS.pedro.id, statuses: ["booked", "completed"] });
-      const last = visits.sort((a, b) => b.start.localeCompare(a.start))[0];
-      const salon = await ctx.store.salon.get();
-      const lastDate = last ? localDateOf(Date.parse(last.start), salon.timezone) : localDateOf(ctx.clock.now(), salon.timezone);
-      const target = zonedInstant(addDaysToDate(lastDate, 27), "10:05", salon.timezone);
-      const jump = Math.max(MINUTE, target - ctx.clock.now());
-      const report = await advanceClock(deps, jump);
-      return {
-        persona: "pedro",
-        focusDate: localDateOf(target, salon.timezone),
-        tick: report,
-        note: `Pasaron ${Math.round(jump / (7 * DAY))} semanas. A las 10:00 el sistema invitó a ${report.reactivation.sent} clientes según su ciclo real, entre ellos Pedro.`,
-      };
-    }
-    case "pedro-yes":
-      await simulateInbound(ctx, PERSONAS.pedro.phone, "sí, dale");
-      return { persona: "pedro", note: "Pedro reserva con un solo «sí». Volvió justo cuando le tocaba." };
-    case "carlos-google-event": {
-      if (!deps.calendar) return { note: "El calendario simulado solo está disponible en la demo." };
-      const view = await boardView(ctx);
-      for (let offset = 1; offset <= 5; offset += 1) {
-        const day = addDaysToDate(view.today, offset);
-        const free = (await boardView(ctx, day)).freeSlots.find((f) => f.staffId === deps.calendarStaffId && Date.parse(f.end) - Date.parse(f.start) >= 30 * MINUTE);
-        if (!free) continue;
-        const end = Math.min(Date.parse(free.end), Date.parse(free.start) + 60 * MINUTE);
-        deps.calendar.addPersonalEvent(deps.calendarId, { title: "Cita médica", start: free.start, end: toIso(end) });
-        await deps.calendarSync.syncStaff(deps.calendarStaffId);
-        return { focusDate: day, note: "Carlos anotó «Cita médica» en SU Google Calendar. Slot Filler bloqueó ese tiempo solo: nadie podrá reservarlo." };
-      }
-      return { note: "Carlos no tiene espacios libres en los próximos días para el ejemplo." };
-    }
-  }
+  const salon = await ctx.store.salon.get();
+  const visits = await ctx.store.appointments.list({ clientId, statuses: ["booked", "completed"] });
+  const last = visits.sort((a, b) => b.start.localeCompare(a.start))[0];
+  const lastDate = last ? localDateOf(Date.parse(last.start), salon.timezone) : localDateOf(ctx.clock.now(), salon.timezone);
+  const cycle = (await loadCycles(ctx)).find((c) => c.clientId === clientId);
+  const expected = cycle ? Math.round(cycle.expectedDays) : 28;
+  const config = await ctx.config();
+  const target = zonedInstant(addDaysToDate(lastDate, Math.max(1, expected - config.reactivation.leadDays)), "10:05", salon.timezone);
+  const report = await advanceClock(deps, Math.max(MINUTE, target - ctx.clock.now()));
+  return { date: localDateOf(ctx.clock.now(), salon.timezone), tick: report };
 }

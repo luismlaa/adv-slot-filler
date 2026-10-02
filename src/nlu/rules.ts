@@ -15,6 +15,9 @@ const PATTERNS: Readonly<Record<Exclude<Intent, "book" | "choose" | "unknown">, 
   thanks: /gracias|thank/,
   greeting: /^(hola|holi|buenas|buenos dias|buenas tardes|buenas noches|saludos|klk|que lo que|que tal|epa|dimelo|diga)/,
   help: /ayuda|como funciona|menu|que puedo hacer/,
+  prices: /cuanto (cuesta|cobran|vale|sale|es|me sale|me cobran)|precio|tarifa|cuanto (es|son) el|a como (esta|sale|es)/,
+  hours: /(a que hora|que hora|hasta que hora|cuando) (abren|cierran|abre|cierra|trabajan|atienden)|horario|estan abiertos|abren (hoy|mañana|el|los)|trabajan (hoy|el|los)/,
+  location: /donde (queda|quedan|estan|esta ubicad|es)|direccion|ubicacion|como llego|por donde queda/,
 };
 
 const BOOKING_VERBS = /quiero|quisiera|me gustaria|necesito|ocupo|puedo ir|reserv|agend|apart|cita|turno|me atiende|me puede atender|me puedes atender|pelarme|cortarme|recortarme|arreglarme|hacerme|pasar(me)? por/;
@@ -64,6 +67,10 @@ export function interpretRules(raw: string, catalog: NluCatalog, context: NluCon
   if (has("deny") && hasTiming) return result("book", 0.75);
   if (has("affirm") && !hasBookingEntity && entities.time === undefined) return result("affirm", 0.9);
   if (has("deny")) return result("deny", 0.9);
+
+  if (has("hours")) return result("hours", 0.9);
+  if (has("location")) return result("location", 0.9);
+  if (has("prices")) return result("prices", 0.9);
 
   if (has("availability")) return result("availability", hasBookingEntity || hasTiming ? 0.9 : 0.8);
   if (BOOKING_VERBS.test(text) || hasBookingEntity || (hasTiming && context.awaiting !== undefined)) {

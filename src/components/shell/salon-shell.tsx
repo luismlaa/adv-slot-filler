@@ -2,10 +2,14 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState, type ReactNode } from "react";
-import { LiveProvider, useLiveConnected, useLiveEvents } from "@/components/live/live-provider";
+import type { ReactNode } from "react";
+import { LiveProvider, useLiveConnected } from "@/components/live/live-provider";
+import { PresenterPanel } from "@/components/demo/presenter-panel";
 import { cx } from "@/components/ui/primitives";
 import { labelAt, localDateIn, shortDate } from "@/lib/client-format";
+import { useSalonClock } from "./use-salon-clock";
+
+export { useSalonClock };
 
 const NAV = [
   { href: "/agenda", label: "Agenda", icon: "📅" },
@@ -15,38 +19,6 @@ const NAV = [
   { href: "/ajustes", label: "Ajustes", icon: "⚙️" },
 ] as const;
 
-interface ClockInfo {
-  now: string;
-  timezone: string;
-  salonName: string;
-  demo: boolean;
-}
-
-/** Reloj del salón: se sincroniza con el servidor (reloj simulado en la demo) y avanza localmente. */
-export function useSalonClock() {
-  const [info, setInfo] = useState<ClockInfo & { receivedAt: number }>();
-  const [display, setDisplay] = useState<string>();
-  const [version, setVersion] = useState(0);
-  useLiveEvents(() => setVersion((v) => v + 1), ["clock.changed", "demo.reset"]);
-  useEffect(() => {
-    const controller = new AbortController();
-    fetch("/api/clock", { signal: controller.signal, cache: "no-store" })
-      .then((r) => r.json())
-      .then((data: ClockInfo) => {
-        setInfo({ ...data, receivedAt: Date.now() });
-        setDisplay(data.now);
-      })
-      .catch(() => undefined);
-    return () => controller.abort();
-  }, [version]);
-  useEffect(() => {
-    if (!info) return;
-    const id = setInterval(() => setDisplay(new Date(Date.parse(info.now) + Date.now() - info.receivedAt).toISOString()), 15_000);
-    return () => clearInterval(id);
-  }, [info]);
-  return info && display ? { ...info, now: display } : undefined;
-}
-
 function Header() {
   const clock = useSalonClock();
   const connected = useLiveConnected();
@@ -54,7 +26,6 @@ function Header() {
     <header className="flex items-center justify-between gap-4 border-b border-stone-200 bg-white px-4 py-2.5 md:px-6">
       <div className="flex items-center gap-2">
         <span className="text-lg font-semibold tracking-tight text-stone-900">{clock?.salonName ?? "Slot Filler"}</span>
-        {clock?.demo && <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800">Demo</span>}
       </div>
       <div className="flex items-center gap-3 text-sm text-stone-600">
         {clock && (
@@ -109,6 +80,7 @@ export function SalonShell({ children }: { children: ReactNode }) {
           <main className="flex-1 p-4 md:p-6">{children}</main>
         </div>
       </div>
+      <PresenterPanel />
     </LiveProvider>
   );
 }

@@ -20,7 +20,8 @@ Tu único trabajo es convertir UN mensaje de un cliente en una interpretación e
 ## Intenciones
 book (quiere una cita) · availability (pregunta qué hay libre) · choose (elige una opción de una lista ya ofrecida) ·
 affirm (sí/dale/ok) · deny (no) · cancel (cancelar su cita) · reschedule (mover su cita) ·
-waitlist (avisarle si se libera algo) · greeting · thanks · opt_out (no quiere más mensajes) · opt_in · help · unknown.
+waitlist (avisarle si se libera algo) · prices (pregunta cuánto cuesta) · hours (horario del salón) ·
+location (dónde queda) · greeting · thanks · opt_out (no quiere más mensajes) · opt_in · help · unknown.
 
 ## Reglas
 - Horas sin am/pm: de 1 a 7 son de la tarde (13:00–19:00); de 8 a 11, de la mañana.

@@ -4,7 +4,7 @@ import { json, requireDemo, route } from "@/lib/http";
 
 export const dynamic = "force-dynamic";
 
-/** Conversación de WhatsApp de un teléfono, tal como la ve el cliente. */
+/** Conversación de WhatsApp de un teléfono, tal como la ve el cliente (demo). */
 export const GET = route(async (request: Request) => {
   requireDemo();
   const phone = phoneSchema.parse(new URL(request.url).searchParams.get("phone"));

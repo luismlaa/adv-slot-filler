@@ -1,13 +1,11 @@
-import type { Metadata } from "next";
-import { notFound } from "next/navigation";
-import { DemoStage } from "@/components/demo/demo-stage";
+import { notFound, redirect } from "next/navigation";
 import { getContainer } from "@/lib/container";
 
-export const metadata: Metadata = { title: "Demo · Slot Filler" };
 export const dynamic = "force-dynamic";
 
+/** La demo ES el producto: entra directo a la agenda del salón seed. El WhatsApp del cliente vive en `/chat`. */
 export default function DemoPage() {
   const { env, demo } = getContainer();
   if (!env.DEMO_MODE || !demo) notFound();
-  return <DemoStage />;
+  redirect("/agenda");
 }

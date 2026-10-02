@@ -59,7 +59,7 @@ Before hand-rolling a common capability, check `npx skills find <query>` / **fin
 ## Build & Run
 - `npm install`
 - `cp .env.example .env` (defaults = demo offline; no keys needed)
-- `npm run demo` → http://localhost:4100/demo (pitch) · `/agenda` (salón) · `/barbero` (móvil)
+- `npm run demo` → http://localhost:4100/agenda (salón; tecla «.» = panel del presentador) · `/chat` (WhatsApp del cliente) · `/barbero` (móvil). `/demo` redirige a `/agenda`.
 - Supabase local (optional, Docker): `npx supabase start -x studio,storage-api,imgproxy,mailpit,edge-runtime,logflare,vector,supavisor,postgres-meta` (API on :55321, DB on :55322) then `DATA_BACKEND=supabase`
 
 ## Test

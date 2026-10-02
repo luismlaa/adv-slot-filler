@@ -70,3 +70,22 @@ Modo: single-instance. Ramas apiladas por fase; merge humano en orden.
 - Google OAuth, WhatsApp real y Claude real quedan para D2–D4; están probados con fixtures y fakes.
 
 **Siguiente:** fases D1–D5 en `docs/deploy-phases.md`.
+
+---
+
+# Post pre-build — plan `~/.claude/plans/resume-tambien-incluye-un-luminous-metcalfe.md`
+
+## PR1 — Demo = producto + chat WhatsApp · `feat/demo-product-parity`
+- [x] `/demo` → `/agenda`; borrar director, demo-stage, phone-simulator, escenas
+- [x] Panel presentador oculto (tecla `.`): reloj, reiniciar, abrir chat, calendario de Carlos
+- [x] Ruta `/chat` estilo WhatsApp (selector de cliente, burbujas, ✓✓, escribiendo…, chips)
+- [x] Copy más natural + intents del día a día (saludo, precios, horario, ubicación)
+- [x] Claude de respaldo con caída a reglas y tope diario
+- [x] e2e y unit reescritos; `docs/pitch-script.md`
+
+## PR2 — Multi-tenant · `feat/multi-tenant`
+- [ ] Contexto por salón, auth por membresía, webhook por phone_number_id, crons por salón
+- [ ] Migración (slug, active, whatsapp_phone_number_id) + `salon:create` + test de aislamiento
+
+## PR3 — Infra de deploy · `chore/deploy-readiness`
+- [ ] Entornos staging/prod, CD, observabilidad, backups, páginas legales, runbook
