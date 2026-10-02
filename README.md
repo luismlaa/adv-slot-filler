@@ -28,8 +28,13 @@ El guion paso a paso está en [`docs/pitch-script.md`](docs/pitch-script.md).
 ## Desarrollo
 
 ```bash
-npm run check   # typecheck + lint + tests unitarios
-npm run e2e     # Playwright recorre el guion de pitch completo
+npm run check        # typecheck + lint + tests unitarios
+npm run e2e          # Playwright recorre el guion de pitch completo (build de producción, offline)
+npm run cf:preview   # build para Cloudflare Workers y vista local con wrangler
+npm run db:seed      # carga el salón de demo en un Supabase (local o staging)
+npm run import:csv -- historial.csv   # importa el historial real de un salón (dry-run por defecto)
 ```
+
+Stack: Next.js 16 y TypeScript strict. Los datos van en Supabase (Postgres, Auth y Realtime) y el hosting en Cloudflare Workers, ambos en capa gratuita con uso comercial permitido.
 
 La arquitectura y las reglas del proyecto están en [`CLAUDE.md`](CLAUDE.md). Lo que falta para producción (WhatsApp, Google Calendar, Supabase cloud, Claude, datos y legal) está en [`docs/deploy-phases.md`](docs/deploy-phases.md).

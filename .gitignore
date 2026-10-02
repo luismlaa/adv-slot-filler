@@ -58,3 +58,8 @@ graphify-out/
 # supabase local
 supabase/.branches
 supabase/.temp
+
+# cloudflare / opennext
+.open-next/
+.wrangler/
+.dev.vars

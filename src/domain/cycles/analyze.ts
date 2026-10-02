@@ -97,7 +97,7 @@ export function analyzeCycles(input: CycleInput): ClientCycle[] {
 /** Panel "clientes por volver esta semana": les toca entre lunes y domingo, o ya se pasaron, y no tienen cita. */
 export function returningThisWeek(cycles: readonly ClientCycle[], weekStart: LocalDate): ClientCycle[] {
   const weekEnd = addDaysToDate(weekStart, 6);
-  const priority: Record<CycleStatus, number> = { overdue: 0, due: 1, at_risk: 2, ok: 3, booked: 4 };
+  const priority: Record<CycleStatus, number> = { due: 0, overdue: 1, at_risk: 2, ok: 3, booked: 4 };
   return cycles
     .filter((c) => c.status !== "booked")
     .filter((c) => (c.dueDate >= weekStart && c.dueDate <= weekEnd) || c.status === "overdue" || c.status === "due")
