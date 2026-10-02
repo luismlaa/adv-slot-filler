@@ -1,0 +1,41 @@
+{
+  "object": "whatsapp_business_account",
+  "entry": [
+    {
+      "id": "102290129340398",
+      "changes": [
+        {
+          "field": "messages",
+          "value": {
+            "messaging_product": "whatsapp",
+            "metadata": { "display_phone_number": "18095550100", "phone_number_id": "106540352242922" },
+            "contacts": [{ "profile": { "name": "Pedro Martínez" }, "wa_id": "18095550101" }],
+            "messages": [
+              {
+                "from": "18095550101",
+                "id": "wamid.HBgLMTgwOTU1NTAxMDEVAgASGBQzQUY3",
+                "timestamp": "1790949600",
+                "type": "text",
+                "text": { "body": "Klk, quiero corte con Carlos el sábado" }
+              },
+              {
+                "from": "18095550101",
+                "id": "wamid.HBgLMTgwOTU1NTAxMDEVAgASGBQzQUY4",
+                "timestamp": "1790949610",
+                "type": "interactive",
+                "interactive": { "type": "button_reply", "button_reply": { "id": "yes", "title": "Sí" } }
+              },
+              {
+                "from": "18095550101",
+                "id": "wamid.HBgLMTgwOTU1NTAxMDEVAgASGBQzQUY5",
+                "timestamp": "1790949620",
+                "type": "audio",
+                "audio": { "id": "1234", "mime_type": "audio/ogg" }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

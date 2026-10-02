@@ -145,6 +145,8 @@ function pickAlternatives(pool: readonly Candidate[], limit: number, maxPerStaff
   const leaders = KIND_PRIORITY.map((kind) => [...pool].filter((c) => c.kind === kind).sort(byScore)[0])
     .filter((c): c is Candidate => c !== undefined)
     .slice(0, limit);
-  return pickDiverse(pool, limit, maxPerStaff, leaders).sort(byScore);
+  // Para mostrar: primero el estilista pedido, luego los demás; dentro de cada grupo, en orden de hora.
+  const rank = (c: Candidate) => KIND_PRIORITY.indexOf(c.kind);
+  return pickDiverse(pool, limit, maxPerStaff, leaders).sort((a, b) => rank(a) - rank(b) || a.start - b.start);
 }
 
