@@ -15,10 +15,12 @@ interface Props {
   onAppointment: (appointment: BoardAppointment) => void;
   onFreeSlot: (slot: FreeSlot) => void;
   highlightIds?: ReadonlySet<string>;
+  /** Columnas más angostas (demo en pantalla dividida). */
+  compact?: boolean;
 }
 
 /** Tablero por columnas (una por estilista) con huecos libres resaltados y relleno en vivo. */
-export function BoardGrid({ view, onAppointment, onFreeSlot, highlightIds }: Props) {
+export function BoardGrid({ view, onAppointment, onFreeSlot, highlightIds, compact = false }: Props) {
   const tz = view.salon.timezone;
   const start = view.dayStartMinutes;
   const height = (view.dayEndMinutes - start) * PX_PER_MINUTE;
@@ -42,7 +44,7 @@ export function BoardGrid({ view, onAppointment, onFreeSlot, highlightIds }: Pro
 
   return (
     <div className="overflow-x-auto rounded-xl border border-stone-200 bg-white shadow-sm">
-      <div className="grid min-w-max" style={{ gridTemplateColumns: `3.5rem repeat(${view.staff.length}, minmax(11rem, 1fr))` }}>
+      <div className="grid min-w-max" style={{ gridTemplateColumns: `3.5rem repeat(${view.staff.length}, minmax(${compact ? "8.5rem" : "11rem"}, 1fr))` }}>
         <div className="sticky left-0 z-20 border-b border-r border-stone-200 bg-white" />
         {view.staff.map((s) => (
           <div key={s.id} className="border-b border-stone-200 px-3 py-2">
