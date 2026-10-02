@@ -10,10 +10,10 @@
     "weights": {
       "requestedStaff": 3.0,
       "preferredStaff": 1.5,
-      "timeDistancePerHour": 0.08,
+      "timeDistancePerHour": 0.5,
       "dayDistance": 0.6,
       "loadBalance": 1.2,
-      "fragmentation": 0.8
+      "fragmentation": 0.3
     }
   },
   "gapfill": {
