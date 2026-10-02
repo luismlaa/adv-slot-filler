@@ -1,26 +1,43 @@
 {
-  "name": "adv-slot-filler",
+  "name": "slot-filler",
   "version": "0.1.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "demo": "DEMO_MODE=true DATA_BACKEND=memory next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run tests/unit",
+    "test:watch": "vitest tests/unit",
+    "test:integration": "vitest run tests/integration",
+    "e2e": "playwright test",
+    "check": "npm run typecheck && npm run lint && npm test"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.131.0",
+    "@date-fns/tz": "^1.5.0",
+    "@supabase/supabase-js": "^2.117.2",
+    "chrono-node": "^2.10.1",
+    "date-fns": "^4.4.0",
     "next": "16.3.8",
     "react": "19.2.8",
-    "react-dom": "19.2.8"
+    "react-dom": "19.2.8",
+    "zod": "^4.6.5"
   },
   "devDependencies": {
+    "@playwright/test": "^1.63.0",
     "@tailwindcss/postcss": "^4",
-    "@types/node": "^20",
+    "@types/node": "^22.20.5",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@vitest/coverage-v8": "^5.0.3",
     "eslint": "^9",
     "eslint-config-next": "16.3.8",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "tsx": "^4.23.15",
+    "typescript": "^5",
+    "vitest": "^5.0.3"
   }
 }

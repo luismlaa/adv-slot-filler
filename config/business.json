@@ -1,0 +1,57 @@
+{
+  "slots": {
+    "granularityMinutes": 15,
+    "minLeadMinutes": 30,
+    "searchHorizonDays": 7
+  },
+  "allocation": {
+    "maxAlternatives": 3,
+    "maxPerStaff": 2,
+    "weights": {
+      "requestedStaff": 3.0,
+      "preferredStaff": 1.5,
+      "timeDistancePerHour": 0.08,
+      "dayDistance": 0.6,
+      "loadBalance": 1.2,
+      "fragmentation": 0.8
+    }
+  },
+  "gapfill": {
+    "mode": "auto",
+    "offerTtlMinutes": 15,
+    "waveSize": 3,
+    "maxWaves": 3,
+    "minNoticeMinutes": 60,
+    "recentOfferCooldownDays": 3,
+    "weights": {
+      "waitlist": 3.0,
+      "waitlistAgePerDay": 0.1,
+      "staffMatch": 1.0,
+      "cycleDue": 1.5,
+      "cycleOverdue": 2.0
+    }
+  },
+  "cycles": {
+    "minIntervalDays": 5,
+    "recencyHalfLife": 3,
+    "shrinkK": 2,
+    "outlierFactor": 2.5,
+    "dueWindowBeforeDays": 3,
+    "dueWindowAfterDays": 4,
+    "atRiskFactor": 2.0,
+    "lookbackDays": 400
+  },
+  "reactivation": {
+    "mode": "auto",
+    "leadDays": 1,
+    "renudgeAfterDays": 10,
+    "maxPerRun": 50,
+    "sendHourLocal": 10,
+    "slotsToOffer": 2
+  },
+  "messaging": {
+    "quietHoursStart": 21,
+    "quietHoursEnd": 8,
+    "maxPerMinute": 30
+  }
+}
