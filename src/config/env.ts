@@ -23,6 +23,7 @@ export const envSchema = z
     NEXT_PUBLIC_SUPABASE_ANON_KEY: optionalString,
     SUPABASE_SERVICE_ROLE_KEY: optionalString,
     SALON_ID: optionalString,
+    SALON_TIMEZONE: z.string().default("America/Santo_Domingo"),
 
     LLM_PROVIDER: z.enum(["rules", "claude"]).default("rules"),
     ANTHROPIC_API_KEY: optionalString,

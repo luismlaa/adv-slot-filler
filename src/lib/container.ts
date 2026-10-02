@@ -1,4 +1,6 @@
 import "server-only";
+import { FakeCalendarProvider } from "@/adapters/calendar/fake";
+import { createGoogleCalendarProvider } from "@/adapters/calendar/google";
 import { createClaudeProvider } from "@/adapters/llm/claude";
 import { createJsonLogger } from "@/adapters/logging/json-logger";
 import { InMemoryEventBus, SimulatedClock, randomIds, systemClock } from "@/adapters/memory/runtime";
@@ -12,13 +14,15 @@ import { type BusinessConfigOverrides, resolveBusinessConfig } from "@/config/bu
 import { type Env, getEnv } from "@/config/env";
 import { createCompositeProvider } from "@/nlu/composite";
 import { rulesProvider } from "@/nlu/rules";
-import type { Clock, MessagingChannel, Store } from "@/ports";
+import type { CalendarProvider, Clock, MessagingChannel, Store } from "@/ports";
+import { type CalendarSync, createCalendarSync } from "@/services/calendar-sync";
 import type { AppContext } from "@/services/context";
 
-/** Estado exclusivo de la demo: base en memoria y reloj simulado. */
+/** Estado exclusivo de la demo: base en memoria, reloj simulado y Google Calendar simulado. */
 export interface DemoRuntime {
   readonly holder: MemoryHolder;
   readonly clock: SimulatedClock;
+  readonly calendar?: FakeCalendarProvider;
   seed: DemoSeed;
   reset(): void;
 }
@@ -26,8 +30,12 @@ export interface DemoRuntime {
 export interface Container {
   readonly env: Env;
   readonly ctx: AppContext;
+  readonly calendarSync: CalendarSync;
   readonly demo?: DemoRuntime;
 }
+
+/** En la demo, Carlos ya tiene su Google Calendar conectado (simulado). */
+export const DEMO_CALENDAR = { staffId: "staff-carlos", calendarId: "carlos.pena@gmail.com" } as const;
 
 function buildContainer(): Container {
   const env = getEnv();
@@ -54,6 +62,8 @@ function buildContainer(): Container {
         runtime.seed = fresh;
         holder.db = fresh.db;
         simulated.set(fresh.anchor);
+        runtime.calendar?.reset();
+        if (runtime.calendar) void calendarSync.connect(DEMO_CALENDAR.staffId, DEMO_CALENDAR.calendarId);
         bus.publish({ type: "demo.reset", salonId: fresh.db.salon.id, at: new Date(fresh.anchor).toISOString(), payload: {} });
       },
     };
@@ -80,7 +90,17 @@ function buildContainer(): Container {
       ? createCompositeProvider(createClaudeProvider({ apiKey: env.ANTHROPIC_API_KEY!, model: env.CLAUDE_MODEL, timeoutMs: env.LLM_TIMEOUT_MS, logger }))
       : rulesProvider;
 
-  const ctx: AppContext = {
+  const calendarProvider: CalendarProvider =
+    env.CALENDAR_PROVIDER === "google"
+      ? createGoogleCalendarProvider(
+          { clientId: env.GOOGLE_CLIENT_ID!, clientSecret: env.GOOGLE_CLIENT_SECRET!, redirectUri: env.GOOGLE_REDIRECT_URI! },
+          env.SALON_TIMEZONE,
+          logger,
+        )
+      : new FakeCalendarProvider(() => clock.now());
+  if (demo && calendarProvider instanceof FakeCalendarProvider) (demo as { calendar?: FakeCalendarProvider }).calendar = calendarProvider;
+
+  const base: Omit<AppContext, "calendar"> = {
     store,
     clock,
     ids,
@@ -90,8 +110,11 @@ function buildContainer(): Container {
     nlu,
     config: async () => resolveBusinessConfig((await store.salon.get()).settings as BusinessConfigOverrides),
   };
+  const calendarSync = createCalendarSync(base, calendarProvider, env.CALENDAR_PROVIDER === "google" ? env.GOOGLE_WEBHOOK_URL : undefined);
+  const ctx: AppContext = { ...base, calendar: calendarSync.hooks };
+  if (demo?.calendar) void calendarSync.connect(DEMO_CALENDAR.staffId, DEMO_CALENDAR.calendarId);
   logger.info("Slot Filler iniciado", { backend: env.DATA_BACKEND, demo: env.DEMO_MODE, messaging: messaging.name, nlu: nlu.name, calendar: env.CALENDAR_PROVIDER });
-  return { env, ctx, demo };
+  return { env, ctx, calendarSync, demo };
 }
 
 const globalForContainer = globalThis as unknown as { __slotFiller?: Container };
