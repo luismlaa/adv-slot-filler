@@ -26,7 +26,7 @@ export const envSchema = z
 
     LLM_PROVIDER: z.enum(["rules", "claude"]).default("rules"),
     ANTHROPIC_API_KEY: optionalString,
-    CLAUDE_MODEL: z.string().default("claude-haiku-4-5"),
+    CLAUDE_MODEL: z.string().default("claude-opus-5-5"),
     LLM_TIMEOUT_MS: z.coerce.number().int().positive().default(8000),
 
     MESSAGING_CHANNEL: z.enum(["simulator", "whatsapp"]).default("simulator"),

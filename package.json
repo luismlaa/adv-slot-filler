@@ -19,7 +19,6 @@
     "@anthropic-ai/sdk": "^0.131.0",
     "@date-fns/tz": "^1.5.0",
     "@supabase/supabase-js": "^2.117.2",
-    "chrono-node": "^2.10.1",
     "date-fns": "^4.4.0",
     "next": "16.3.8",
     "react": "19.2.8",
