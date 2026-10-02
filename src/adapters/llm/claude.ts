@@ -1,11 +1,10 @@
-import { readFileSync } from "node:fs";
-import { join } from "node:path";
 import Anthropic from "@anthropic-ai/sdk";
 import { betaZodOutputFormat } from "@anthropic-ai/sdk/helpers/beta/zod";
 import { z } from "zod";
 import { interpretRules } from "@/nlu/rules";
 import { type Interpretation, type LLMProvider, type NluCatalog, type NluContext, intentSchema, interpretationSchema } from "@/nlu/types";
 import type { Logger } from "@/ports";
+import { INTERPRET_PROMPT_V1 } from "../../../prompts/claude/v1/interpret";
 
 /** Esquema de salida que se le pide a Claude (todo requerido, `null` = no aplica). */
 const claudeOutputSchema = z.object({
@@ -22,14 +21,14 @@ const claudeOutputSchema = z.object({
   choice: z.number().nullable(),
 });
 
-const PROMPT_VERSION = "v1";
-const loadPrompt = () => readFileSync(join(process.cwd(), "prompts", "claude", PROMPT_VERSION, "interpret.md"), "utf8");
 
 export interface ClaudeProviderOptions {
   readonly apiKey: string;
   readonly model: string;
   readonly timeoutMs: number;
   readonly logger: Logger;
+  /** Inyectable para pruebas (sin red). */
+  readonly fetch?: typeof fetch;
 }
 
 /** Catálogo serializado de forma estable (mismo orden siempre → caché de prompt efectiva). */
@@ -44,8 +43,8 @@ function describeCatalog(catalog: NluCatalog): string {
  * Cualquier fallo (timeout, rechazo, salida inválida) devuelve la interpretación por reglas.
  */
 export function createClaudeProvider(options: ClaudeProviderOptions): LLMProvider {
-  const client = new Anthropic({ apiKey: options.apiKey, timeout: options.timeoutMs, maxRetries: 1 });
-  const system = loadPrompt();
+  const client = new Anthropic({ apiKey: options.apiKey, timeout: options.timeoutMs, maxRetries: 1, fetch: options.fetch });
+  const system = INTERPRET_PROMPT_V1;
 
   return {
     name: "claude",

@@ -1,10 +1,10 @@
 import { getContainer } from "@/lib/container";
-import { HttpError, json, route } from "@/lib/http";
+import { HttpError, json, salonRoute } from "@/lib/http";
 import { publish } from "@/services/data";
 
 export const dynamic = "force-dynamic";
 
-export const DELETE = route(async (_request: Request, context: RouteContext<"/api/waitlist/[id]">) => {
+export const DELETE = salonRoute(async (_request: Request, context: RouteContext<"/api/waitlist/[id]">) => {
   const { ctx } = getContainer();
   const { id } = await context.params;
   const updated = await ctx.store.waitlist.update(id, { status: "cancelled" });

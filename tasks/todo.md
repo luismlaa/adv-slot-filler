@@ -12,43 +12,61 @@ Modo: single-instance. Ramas apiladas por fase; merge humano en orden.
 - [x] graphify
 
 ## F1 — Dominio: modelo, tiempo, asignación · `feat/f1-domain-allocation`
-- [ ] Esquemas zod (Salon, Staff, Service, Client, Appointment, Block, Waitlist, Gap, Offer, Nudge, Message)
-- [ ] Motor de slots (horarios, descansos, buffers, granularidad, tz)
-- [ ] Motor de asignación (especialidad, alternativas, balanceo, fragmentación) + tests
+- [x] Esquemas zod (Salon, Staff, Service, Client, Appointment, Block, Waitlist, Gap, Offer, Nudge, Message)
+- [x] Motor de slots (horarios, descansos, buffers, granularidad, tz)
+- [x] Motor de asignación (especialidad, alternativas, balanceo, fragmentación) + tests
 
 ## F2 — Ciclos + relleno + métricas · `feat/f2-cycles-gapfill`
-- [ ] `cycles/` estimador robusto + estados + tests con patrones sintéticos
-- [ ] `gapfill/` candidatos, olas, TTL, first-accept-wins + tests
-- [ ] `metrics/` ROI + tests
+- [x] `cycles/` estimador robusto + estados + tests con patrones sintéticos
+- [x] `gapfill/` candidatos, olas, TTL, first-accept-wins + tests
+- [x] `metrics/` ROI + tests
 
 ## F3 — Persistencia · `feat/f3-persistence`
-- [ ] Ports + adaptador memory + seed determinista "Barbería El Clásico"
-- [ ] Migraciones Supabase (RLS, exclusion constraint) + adaptador supabase
-- [ ] Importador CSV
+- [x] Ports + adaptador memory + seed determinista "Barbería El Clásico"
+- [x] Migraciones Supabase (RLS, exclusion constraint) + adaptador supabase
+- [x] Importador CSV
 
 ## F4 — Conversación + mensajería · `feat/f4-conversation`
-- [ ] Parser NLU ES (≥40 frases) + máquina de diálogo
-- [ ] LLMProvider rules | claude (prompt versionado)
-- [ ] MessagingChannel simulator | WhatsApp Cloud (fixtures)
+- [x] Parser NLU ES (≥40 frases) + máquina de diálogo
+- [x] LLMProvider rules | claude (prompt versionado)
+- [x] MessagingChannel simulator | WhatsApp Cloud (fixtures)
 
 ## F5 — UI salón · `feat/f5-salon-ui`
-- [ ] Agenda por columnas en vivo, huecos, cancelar → relleno
-- [ ] Por volver, lista de espera, métricas ROI, ajustes
+- [x] Agenda por columnas en vivo, huecos, cancelar → relleno
+- [x] Por volver, lista de espera, métricas ROI, ajustes
 
 ## F6 — Barbero móvil + calendario · `feat/f6-barber-calendar`
-- [ ] Vista "Mi día" + bloqueos
-- [ ] Sync bidireccional (fake + Google) + tests
+- [x] Vista "Mi día" + bloqueos
+- [x] Sync bidireccional (fake + Google) + tests
 
 ## F7 — Demo de pitch · `feat/f7-demo`
-- [ ] `/demo` split + reloj simulado + director de escenarios + reset
-- [ ] Playwright del guion + `docs/pitch-script.md`
+- [x] `/demo` split + reloj simulado + director de escenarios + reset
+- [x] Playwright del guion + `docs/pitch-script.md`
 
 ## F8 — Endurecimiento · `feat/f8-hardening`
-- [ ] Logging, timeouts/reintentos, rate limit, dry-run, healthcheck, CI, a11y, checklist P0
+- [x] Logging, timeouts/reintentos, rate limit, dry-run, healthcheck, CI, a11y, checklist P0
 
 ## Paralelizable con subagentes
 - F1 esquemas ↔ F3 migraciones (una vez fijado el modelo)
 - F4 parser ↔ F5 UI (una vez fijados los ports)
 
-## Review
-_(se completa al cerrar cada fase)_
+## Review — 2026-10-02
+
+**Estado:** pre-build completo, F0–F8 en ramas apiladas, sin merge (lo hace un humano en orden).
+
+**Verificación:**
+- `npm run check`: typecheck, lint y 190 tests unitarios/integración en verde.
+- `npm run e2e`: 3 tests de Playwright sobre la build de producción, que recorren el guion completo offline.
+- `npm run cf:build` compila para Workers; `wrangler dev` sirve health, tablero y guion en workerd.
+
+**Desvíos del plan:**
+- shadcn/ui no se usó: con primitivas propias en Tailwind bastó y hay menos dependencias.
+- chrono-node se quitó: interpretaba mal "pasado mañana" y "a las 3"; ahora hay un parser propio.
+- Hosting en Cloudflare Workers, no en Vercel Hobby: Hobby prohíbe el uso comercial (misma decisión que en Orbit).
+- La UI en vivo en producción usa Supabase Realtime: el bus en memoria no cruza isolates de Workers.
+
+**Pendiente (no verificable aquí):**
+- El adaptador Supabase no se probó contra una BD real: Docker se quedó sin disco. El test de contrato está listo en `tests/integration`.
+- Google OAuth, WhatsApp real y Claude real quedan para D2–D4; están probados con fixtures y fakes.
+
+**Siguiente:** fases D1–D5 en `docs/deploy-phases.md`.

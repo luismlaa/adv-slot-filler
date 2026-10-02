@@ -71,7 +71,7 @@ Before hand-rolling a common capability, check `npx skills find <query>` / **fin
 - `src/nlu/` — Spanish (Dominican) intent parser; `LLMProvider` = `rules` (default, free) | `claude` (fallback for low-confidence messages).
 - `src/ports/` — interfaces: `Store`, `EventBus`, `MessagingChannel`, `CalendarProvider`, `Clock`, `Logger`.
 - `src/adapters/` — `memory` (demo seed), `supabase`, `whatsapp` (simulator | Meta Cloud API), `calendar` (fake | Google), `llm` (Claude).
-- `src/services/` — use cases orchestrating domain + ports; `src/app/` — Next.js UI + route handlers; `src/lib/container.ts` wires adapters from env.
+- `src/services/` — use cases orchestrating domain + ports (`views/` = read models for the UI, `demo-script.ts` = pitch steps); `src/app/` — Next.js UI + route handlers; `src/lib/container.ts` wires adapters from env.
 - Business rules live in `config/business.json` (+ per-salon overrides), validated by `src/config/business.ts`; env via `src/config/env.ts`.
 - Concurrency safety is compare-and-set at the port (`claimOffer`, `insertAppointmentIfFree`) + DB exclusion constraint — never read-then-write.
 
@@ -86,6 +86,9 @@ Before hand-rolling a common capability, check `npx skills find <query>` / **fin
 - Many small files (200–400 lines, 800 hard max).
 
 ## Gotchas
-- Next 16: async `params`/`searchParams`, `proxy.ts` replaces middleware — read `node_modules/next/dist/docs/` before using a Next API.
+- Next 16: async `params`/`searchParams`, `src/proxy.ts` replaces middleware (optimistic session check only; authorization is `salonRoute` → `requireSalonMember` in each route handler). `RouteContext`/`PageProps` types come from `next typegen` (run by `npm run typecheck`).
+- Production runs on Cloudflare Workers (`npm run cf:build`): no `fs`, no shared memory between isolates → live UI uses `NEXT_PUBLIC_LIVE_TRANSPORT=supabase`; prompts are TS modules, not files read at runtime.
+- The demo container lives on `globalThis`: after changing `src/lib/container.ts`, restart `npm run demo`.
+- React 19 lint: no synchronous `setState` in effects; remount with `key` to reset dialog state.
 - The in-memory store is a `globalThis` singleton so all route handlers share one demo state.
 - No `next/font/google`: the demo must run offline, so fonts are system stacks.

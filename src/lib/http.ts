@@ -1,15 +1,10 @@
 import "server-only";
 import { ZodError, type z } from "zod";
+import { requireSalonMember } from "./auth";
 import { getContainer } from "./container";
+import { HttpError } from "./http-error";
 
-export class HttpError extends Error {
-  constructor(
-    readonly status: number,
-    message: string,
-  ) {
-    super(message);
-  }
-}
+export { HttpError };
 
 export const json = (data: unknown, status = 200) => Response.json(data, { status, headers: { "Cache-Control": "no-store" } });
 
@@ -36,6 +31,14 @@ export function route<Args extends unknown[]>(handler: (...args: Args) => Promis
       return json({ error: "Error interno" }, 500);
     }
   };
+}
+
+/** Igual que `route`, pero exige un miembro del salón con sesión (en producción). */
+export function salonRoute<Args extends unknown[]>(handler: (...args: Args) => Promise<Response>) {
+  return route(async (...args: Args) => {
+    await requireSalonMember();
+    return handler(...args);
+  });
 }
 
 /** Rutas que solo existen en modo demo (reloj simulado, reset, teléfono simulado). */

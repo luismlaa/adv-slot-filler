@@ -1,9 +1,17 @@
+import { requireSalonMember } from "@/lib/auth";
 import { getContainer } from "@/lib/container";
+import { HttpError } from "@/lib/http-error";
 
 export const dynamic = "force-dynamic";
 
 /** Stream SSE de eventos de dominio: el tablero y el teléfono simulado se refrescan al instante. */
-export function GET(request: Request) {
+export async function GET(request: Request) {
+  try {
+    await requireSalonMember();
+  } catch (error) {
+    const status = error instanceof HttpError ? error.status : 500;
+    return Response.json({ error: error instanceof Error ? error.message : "Error" }, { status });
+  }
   const { ctx } = getContainer();
   const encoder = new TextEncoder();
   let unsubscribe = () => {};

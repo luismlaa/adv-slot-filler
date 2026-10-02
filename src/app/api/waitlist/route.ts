@@ -2,7 +2,7 @@ import { z } from "zod";
 import { idSchema, instantSchema } from "@/domain/model";
 import { toIso } from "@/domain/time";
 import { getContainer } from "@/lib/container";
-import { json, parseBody, route } from "@/lib/http";
+import { json, parseBody, salonRoute } from "@/lib/http";
 import { recordActivity } from "@/services/activity";
 import { publish } from "@/services/data";
 import { runGap } from "@/services/gapfill";
@@ -10,13 +10,13 @@ import { waitlistView } from "@/services/views/waitlist";
 
 export const dynamic = "force-dynamic";
 
-export const GET = route(async () => json(await waitlistView(getContainer().ctx)));
+export const GET = salonRoute(async () => json(await waitlistView(getContainer().ctx)));
 
 const bodySchema = z
   .object({ clientId: idSchema, serviceId: idSchema, staffIds: z.array(idSchema).default([]), windowStart: instantSchema, windowEnd: instantSchema })
   .refine((b) => b.windowStart < b.windowEnd, "La ventana debe terminar después de empezar");
 
-export const POST = route(async (request: Request) => {
+export const POST = salonRoute(async (request: Request) => {
   const { ctx } = getContainer();
   const body = await parseBody(request, bodySchema);
   const entry = await ctx.store.waitlist.insert({ id: ctx.ids.newId(), salonId: ctx.store.salonId, ...body, status: "active", createdAt: toIso(ctx.clock.now()) });

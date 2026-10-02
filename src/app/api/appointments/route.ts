@@ -3,7 +3,7 @@ import { idSchema, instantSchema, phoneSchema } from "@/domain/model";
 import { normalizePhone } from "@/domain/text";
 import { toIso } from "@/domain/time";
 import { getContainer } from "@/lib/container";
-import { HttpError, json, parseBody, route } from "@/lib/http";
+import { HttpError, json, parseBody, salonRoute } from "@/lib/http";
 import { bookAppointment } from "@/services/booking";
 
 export const dynamic = "force-dynamic";
@@ -18,7 +18,7 @@ const bodySchema = z.object({
 });
 
 /** Reserva hecha desde el salón (recepción o el propio barbero). */
-export const POST = route(async (request: Request) => {
+export const POST = salonRoute(async (request: Request) => {
   const { ctx } = getContainer();
   const body = await parseBody(request, bodySchema);
   let clientId = body.clientId;

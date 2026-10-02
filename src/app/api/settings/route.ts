@@ -1,12 +1,12 @@
 import { z } from "zod";
 import { getContainer } from "@/lib/container";
-import { json, parseBody, route } from "@/lib/http";
+import { json, parseBody, salonRoute } from "@/lib/http";
 import { publish } from "@/services/data";
 import { updateBusinessSettings } from "@/services/settings";
 
 export const dynamic = "force-dynamic";
 
-export const GET = route(async () => {
+export const GET = salonRoute(async () => {
   const { ctx } = getContainer();
   const [salon, config, staff, services, specialties, calendarLinks] = await Promise.all([
     ctx.store.salon.get(),
@@ -29,7 +29,7 @@ export const GET = route(async () => {
 /** Overrides parciales; el resultado completo se valida con el esquema de negocio. */
 const bodySchema = z.record(z.string(), z.record(z.string(), z.unknown()));
 
-export const PUT = route(async (request: Request) => {
+export const PUT = salonRoute(async (request: Request) => {
   const { ctx } = getContainer();
   const body = await parseBody(request, bodySchema);
   const config = await updateBusinessSettings(ctx, body);

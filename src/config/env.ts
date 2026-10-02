@@ -18,6 +18,7 @@ export const envSchema = z
 
     DEMO_MODE: flag,
     DATA_BACKEND: z.enum(["memory", "supabase"]).default("memory"),
+    NEXT_PUBLIC_LIVE_TRANSPORT: z.enum(["sse", "supabase"]).default("sse"),
 
     NEXT_PUBLIC_SUPABASE_URL: optionalString,
     NEXT_PUBLIC_SUPABASE_ANON_KEY: optionalString,

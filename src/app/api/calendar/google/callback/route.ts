@@ -1,13 +1,13 @@
 import { cookies } from "next/headers";
 import { exchangeCode } from "@/adapters/calendar/google";
 import { getContainer } from "@/lib/container";
-import { HttpError, route } from "@/lib/http";
+import { HttpError, salonRoute } from "@/lib/http";
 import { recordActivity } from "@/services/activity";
 
 export const dynamic = "force-dynamic";
 
 /** Vuelta de Google: valida el `state` contra la cookie (anti-CSRF), guarda el refresh token y sincroniza. */
-export const GET = route(async (request: Request) => {
+export const GET = salonRoute(async (request: Request) => {
   const { env, ctx, calendarSync } = getContainer();
   if (env.CALENDAR_PROVIDER !== "google") throw new HttpError(404, "Google Calendar no está configurado");
   const params = new URL(request.url).searchParams;

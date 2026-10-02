@@ -1,11 +1,11 @@
 import { normalizeText } from "@/domain/text";
 import { getContainer } from "@/lib/container";
-import { json, route } from "@/lib/http";
+import { json, salonRoute } from "@/lib/http";
 
 export const dynamic = "force-dynamic";
 
 /** Búsqueda de clientes por nombre o teléfono (para reservas desde el salón). */
-export const GET = route(async (request: Request) => {
+export const GET = salonRoute(async (request: Request) => {
   const q = normalizeText(new URL(request.url).searchParams.get("q") ?? "");
   const clients = await getContainer().ctx.store.clients.list();
   const digits = q.replace(/\D/g, "");

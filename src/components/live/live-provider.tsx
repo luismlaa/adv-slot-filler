@@ -2,6 +2,7 @@
 
 import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from "react";
 import type { DomainEvent, DomainEventType } from "@/ports/runtime";
+import { connectSupabaseRealtime } from "./supabase-transport";
 
 type Listener = (event: DomainEvent) => void;
 
@@ -18,13 +19,17 @@ export function LiveProvider({ children }: { children: ReactNode }) {
   const [connected, setConnected] = useState(false);
 
   useEffect(() => {
+    const emit = (event: DomainEvent) => {
+      for (const listener of listeners.current) listener(event);
+    };
+    // Producción (varias instancias): Supabase Realtime. Demo / un solo proceso: SSE del bus en memoria.
+    if (process.env.NEXT_PUBLIC_LIVE_TRANSPORT === "supabase") return connectSupabaseRealtime(emit, setConnected);
     const source = new EventSource("/api/events");
     source.onopen = () => setConnected(true);
     source.onerror = () => setConnected(false);
     source.onmessage = (message) => {
       try {
-        const event = JSON.parse(message.data) as DomainEvent;
-        for (const listener of listeners.current) listener(event);
+        emit(JSON.parse(message.data) as DomainEvent);
       } catch {
         // mensaje no JSON (heartbeat): se ignora
       }
