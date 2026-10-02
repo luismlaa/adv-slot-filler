@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "demo": "DEMO_MODE=true DATA_BACKEND=memory next dev",
+    "demo": "DEMO_MODE=true DATA_BACKEND=memory next dev -p 4100",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
