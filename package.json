@@ -17,9 +17,11 @@
     "db:seed": "tsx scripts/seed-supabase.ts",
     "import:csv": "tsx scripts/import-csv.ts",
     "salon:create": "tsx scripts/salon-create.ts",
+    "client:erase": "tsx scripts/client-erase.ts",
     "cf:build": "opennextjs-cloudflare build",
     "cf:preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
-    "cf:deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy"
+    "cf:deploy:staging": "opennextjs-cloudflare build && opennextjs-cloudflare deploy --env staging",
+    "cf:deploy:production": "opennextjs-cloudflare build && opennextjs-cloudflare deploy --env production"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.131.0",

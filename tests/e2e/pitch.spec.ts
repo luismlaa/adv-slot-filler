@@ -88,6 +88,8 @@ test.describe("demo de pitch", () => {
       ["/ajustes", "Automatización"],
       ["/barbero", "Próximo cliente"],
       ["/chat", "Elige un cliente"],
+      ["/privacidad", "Ley 172-13"],
+      ["/terminos", "Términos del servicio"],
     ] as const) {
       await page.goto(path);
       await expect(page.getByText(text).first()).toBeVisible({ timeout: 20_000 });

@@ -1,0 +1,34 @@
+name: Backup
+
+# Respaldo diario de la base de producción (el plan free de Supabase no tiene PITR).
+# El dump se cifra con BACKUP_PASSPHRASE antes de salir del runner y se guarda 30 días como artefacto.
+# Restaurar: gpg -d backup.sql.gz.gpg | gunzip | psql "$DB_URL"
+on:
+  schedule:
+    - cron: "17 8 * * *" # 4:17 a. m. en Santo Domingo
+  workflow_dispatch:
+
+jobs:
+  backup:
+    if: vars.DEPLOY_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment: production
+    steps:
+      - name: pg_dump cifrado
+        env:
+          DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+          PASSPHRASE: ${{ secrets.BACKUP_PASSPHRASE }}
+        run: |
+          set -euo pipefail
+          test -n "$PASSPHRASE" || { echo "Falta BACKUP_PASSPHRASE"; exit 1; }
+          docker run --rm -e DB_URL postgres:17-alpine sh -c 'pg_dump "$DB_URL" --no-owner --no-privileges --schema=public --schema=auth' \
+            | gzip -9 \
+            | gpg --batch --yes --symmetric --cipher-algo AES256 --passphrase "$PASSPHRASE" -o backup.sql.gz.gpg
+          ls -lh backup.sql.gz.gpg
+          test "$(stat -c %s backup.sql.gz.gpg)" -gt 1000 || { echo "El respaldo salió vacío"; exit 1; }
+      - uses: actions/upload-artifact@v4
+        with:
+          name: db-backup-${{ github.run_id }}
+          path: backup.sql.gz.gpg
+          retention-days: 30

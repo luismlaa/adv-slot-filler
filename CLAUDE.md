@@ -73,6 +73,7 @@ Before hand-rolling a common capability, check `npx skills find <query>` / **fin
 - `src/adapters/` — `memory` (demo seed), `supabase`, `whatsapp` (simulator | Meta Cloud API), `calendar` (fake | Google), `llm` (Claude).
 - `src/services/` — use cases orchestrating domain + ports (`views/` = read models for the UI, `demo-script.ts` = pitch steps); `src/app/` — Next.js UI + route handlers; `src/lib/container.ts` wires adapters from env.
 - Business rules live in `config/business.json` (+ per-salon overrides), validated by `src/config/business.ts`; env via `src/config/env.ts`.
+- **Multi-tenant:** one instance serves N salons. Handlers get their salon via `salonRoute(async ({ ctx }, request) => …)` (membership decides the salon) — never a global ctx. Inputs without a session resolve the salon through `TenantDirectory` (WhatsApp `phone_number_id`, Google channel id); crons fan out per salon (`forEachSalon`, `?salon=`). Demo-only routes use `demoScope()`.
 - Concurrency safety is compare-and-set at the port (`claimOffer`, `insertAppointmentIfFree`) + DB exclusion constraint — never read-then-write.
 
 ## Critical Rules
@@ -91,4 +92,7 @@ Before hand-rolling a common capability, check `npx skills find <query>` / **fin
 - The demo container lives on `globalThis`: after changing `src/lib/container.ts`, restart `npm run demo`.
 - React 19 lint: no synchronous `setState` in effects; remount with `key` to reset dialog state.
 - The in-memory store is a `globalThis` singleton so all route handlers share one demo state.
+- Supabase store runs with the service role (bypasses RLS): every write must stay scoped to `salon_id` (see `scopedUpsert`); composite FKs `(salon_id, …)` back this up in the DB.
+- Migrations are tested on PGlite (`tests/unit/migrations.test.ts`); Supabase-only bits (auth, roles, realtime) are stubbed there.
+- The demo must look exactly like the product: presenter controls live only in the hidden panel (key «.»); `/chat` is the client's WhatsApp.
 - No `next/font/google`: the demo must run offline, so fonts are system stacks.

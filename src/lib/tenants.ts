@@ -10,16 +10,18 @@ export interface SalonRun<T> {
 }
 
 /**
- * Corre un trabajo en cada salón activo, uno por uno. Un salón que falla no detiene a los demás:
+ * Corre un trabajo en cada salón activo (o solo en `only`), uno por uno. Un salón que falla no detiene a los demás:
  * su error queda en el log y en el resultado.
  */
 export async function forEachSalon<T>(
   job: string,
   work: (scope: SalonScope) => Promise<T>,
   { directory, forSalon, logger }: Pick<Container, "directory" | "forSalon" | "logger"> = getContainer(),
+  only?: string,
 ): Promise<SalonRun<T>[]> {
   const runs: SalonRun<T>[] = [];
-  for (const salonId of await directory.activeSalonIds()) {
+  const active = await directory.activeSalonIds();
+  for (const salonId of only ? active.filter((id) => id === only) : active) {
     try {
       runs.push({ salonId, ok: true, result: await work(await forSalon(salonId)) });
     } catch (error) {
