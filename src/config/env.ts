@@ -23,7 +23,6 @@ export const envSchema = z
     NEXT_PUBLIC_SUPABASE_URL: optionalString,
     NEXT_PUBLIC_SUPABASE_ANON_KEY: optionalString,
     SUPABASE_SERVICE_ROLE_KEY: optionalString,
-    SALON_ID: optionalString,
     SALON_TIMEZONE: z.string().default("America/Santo_Domingo"),
 
     LLM_PROVIDER: z.enum(["rules", "claude"]).default("rules"),
@@ -59,13 +58,13 @@ export const envSchema = z
     };
     requireWhen(
       env.DATA_BACKEND === "supabase",
-      ["NEXT_PUBLIC_SUPABASE_URL", "SUPABASE_SERVICE_ROLE_KEY", "SALON_ID"],
+      ["NEXT_PUBLIC_SUPABASE_URL", "SUPABASE_SERVICE_ROLE_KEY"],
       "DATA_BACKEND=supabase",
     );
     requireWhen(env.LLM_PROVIDER === "claude", ["ANTHROPIC_API_KEY"], "LLM_PROVIDER=claude");
     requireWhen(
       env.MESSAGING_CHANNEL === "whatsapp",
-      ["WHATSAPP_PHONE_NUMBER_ID", "WHATSAPP_ACCESS_TOKEN", "WHATSAPP_APP_SECRET", "WHATSAPP_VERIFY_TOKEN"],
+      ["WHATSAPP_ACCESS_TOKEN", "WHATSAPP_APP_SECRET", "WHATSAPP_VERIFY_TOKEN"],
       "MESSAGING_CHANNEL=whatsapp",
     );
     requireWhen(

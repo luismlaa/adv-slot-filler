@@ -1,18 +1,18 @@
-import { requireSalonMember } from "@/lib/auth";
-import { getContainer } from "@/lib/container";
+import { type SalonRequestScope, requestScope } from "@/lib/http";
 import { HttpError } from "@/lib/http-error";
 
 export const dynamic = "force-dynamic";
 
 /** Stream SSE de eventos de dominio: el tablero y el teléfono simulado se refrescan al instante. */
 export async function GET(request: Request) {
+  let scope: SalonRequestScope;
   try {
-    await requireSalonMember();
+    scope = await requestScope();
   } catch (error) {
     const status = error instanceof HttpError ? error.status : 500;
     return Response.json({ error: error instanceof Error ? error.message : "Error" }, { status });
   }
-  const { ctx } = getContainer();
+  const { ctx, salonId } = scope;
   const encoder = new TextEncoder();
   let unsubscribe = () => {};
   let heartbeat: ReturnType<typeof setInterval> | undefined;
@@ -26,7 +26,10 @@ export async function GET(request: Request) {
         }
       };
       send(`retry: 2000\n\n`);
-      unsubscribe = ctx.bus.subscribe((event) => send(`data: ${JSON.stringify(event)}\n\n`));
+      // El bus es de toda la instancia: cada cliente solo recibe los eventos de su salón.
+      unsubscribe = ctx.bus.subscribe((event) => {
+        if (event.salonId === salonId) send(`data: ${JSON.stringify(event)}\n\n`);
+      });
       heartbeat = setInterval(() => send(`: ping\n\n`), 15_000);
       request.signal.addEventListener("abort", () => {
         unsubscribe();

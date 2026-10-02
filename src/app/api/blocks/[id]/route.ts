@@ -1,12 +1,10 @@
-import { getContainer } from "@/lib/container";
 import { HttpError, json, salonRoute } from "@/lib/http";
 import { publish } from "@/services/data";
 
 export const dynamic = "force-dynamic";
 
 /** Solo se borran bloqueos manuales; los del calendario se quitan borrando el evento en el calendario. */
-export const DELETE = salonRoute(async (_request: Request, context: RouteContext<"/api/blocks/[id]">) => {
-  const { ctx } = getContainer();
+export const DELETE = salonRoute(async ({ ctx }, _request: Request, context: RouteContext<"/api/blocks/[id]">) => {
   const { id } = await context.params;
   const block = (await ctx.store.blocks.list()).find((b) => b.id === id);
   if (!block) throw new HttpError(404, "No existe ese bloqueo");

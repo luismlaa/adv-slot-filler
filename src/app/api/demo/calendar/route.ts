@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic";
 
 /** Lo que Carlos vería abriendo su Google Calendar ese día (simulado). */
 export const GET = route(async (request: Request) => {
-  const deps = demoDeps();
+  const deps = await demoDeps();
   if (!deps.calendar) throw new HttpError(404, "Sin calendario simulado");
   const salon = await deps.ctx.store.salon.get();
   const dateParam = new URL(request.url).searchParams.get("date");
@@ -21,7 +21,7 @@ const addSchema = z.object({ title: z.string().min(1).max(60), start: instantSch
 
 /** Carlos agrega un evento personal en su calendario → push → sync → bloqueo en la agenda. */
 export const POST = route(async (request: Request) => {
-  const deps = demoDeps();
+  const deps = await demoDeps();
   if (!deps.calendar) throw new HttpError(404, "Sin calendario simulado");
   const body = await parseBody(request, addSchema);
   const event = deps.calendar.addPersonalEvent(deps.calendarId, body);
@@ -32,7 +32,7 @@ export const POST = route(async (request: Request) => {
 const deleteSchema = z.object({ eventId: z.string().min(1) });
 
 export const DELETE = route(async (request: Request) => {
-  const deps = demoDeps();
+  const deps = await demoDeps();
   if (!deps.calendar) throw new HttpError(404, "Sin calendario simulado");
   const { eventId } = await parseBody(request, deleteSchema);
   deps.calendar.removeEvent(deps.calendarId, eventId);

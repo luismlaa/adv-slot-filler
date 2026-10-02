@@ -1,0 +1,482 @@
+{
+  "specialties": [
+    {
+      "id": "fade",
+      "name": "Fade / degradado"
+    },
+    {
+      "id": "clasico",
+      "name": "Corte clásico"
+    },
+    {
+      "id": "barba",
+      "name": "Barba"
+    },
+    {
+      "id": "color",
+      "name": "Color / tinte"
+    },
+    {
+      "id": "ninos",
+      "name": "Niños"
+    }
+  ],
+  "staff": [
+    {
+      "name": "Carlos Peña",
+      "aliases": [
+        "carlitos"
+      ],
+      "specialties": [
+        "fade",
+        "clasico",
+        "barba"
+      ],
+      "schedule": [
+        [
+          {
+            "start": "09:00",
+            "end": "14:00"
+          }
+        ],
+        [],
+        [
+          {
+            "start": "09:00",
+            "end": "13:00"
+          },
+          {
+            "start": "14:00",
+            "end": "19:00"
+          }
+        ],
+        [
+          {
+            "start": "09:00",
+            "end": "13:00"
+          },
+          {
+            "start": "14:00",
+            "end": "19:00"
+          }
+        ],
+        [
+          {
+            "start": "09:00",
+            "end": "13:00"
+          },
+          {
+            "start": "14:00",
+            "end": "19:00"
+          }
+        ],
+        [
+          {
+            "start": "09:00",
+            "end": "13:00"
+          },
+          {
+            "start": "14:00",
+            "end": "19:00"
+          }
+        ],
+        [
+          {
+            "start": "08:00",
+            "end": "13:00"
+          },
+          {
+            "start": "14:00",
+            "end": "19:00"
+          }
+        ]
+      ],
+      "color": "#2563eb",
+      "active": true
+    },
+    {
+      "name": "Luis Rodríguez",
+      "aliases": [
+        "lucho",
+        "luisito"
+      ],
+      "specialties": [
+        "fade",
+        "ninos"
+      ],
+      "schedule": [
+        [],
+        [],
+        [
+          {
+            "start": "09:00",
+            "end": "12:00"
+          },
+          {
+            "start": "13:00",
+            "end": "19:00"
+          }
+        ],
+        [
+          {
+            "start": "09:00",
+            "end": "12:00"
+          },
+          {
+            "start": "13:00",
+            "end": "19:00"
+          }
+        ],
+        [
+          {
+            "start": "09:00",
+            "end": "12:00"
+          },
+          {
+            "start": "13:00",
+            "end": "19:00"
+          }
+        ],
+        [
+          {
+            "start": "09:00",
+            "end": "12:00"
+          },
+          {
+            "start": "13:00",
+            "end": "19:00"
+          }
+        ],
+        [
+          {
+            "start": "08:00",
+            "end": "13:00"
+          },
+          {
+            "start": "14:00",
+            "end": "19:00"
+          }
+        ]
+      ],
+      "color": "#059669",
+      "active": true
+    },
+    {
+      "name": "Miguel Santos",
+      "aliases": [
+        "miguelito",
+        "mike"
+      ],
+      "specialties": [
+        "barba",
+        "clasico"
+      ],
+      "schedule": [
+        [
+          {
+            "start": "09:00",
+            "end": "14:00"
+          }
+        ],
+        [],
+        [],
+        [
+          {
+            "start": "09:00",
+            "end": "13:00"
+          },
+          {
+            "start": "14:00",
+            "end": "19:00"
+          }
+        ],
+        [
+          {
+            "start": "09:00",
+            "end": "13:00"
+          },
+          {
+            "start": "14:00",
+            "end": "19:00"
+          }
+        ],
+        [
+          {
+            "start": "09:00",
+            "end": "13:00"
+          },
+          {
+            "start": "14:00",
+            "end": "19:00"
+          }
+        ],
+        [
+          {
+            "start": "08:00",
+            "end": "13:00"
+          },
+          {
+            "start": "14:00",
+            "end": "19:00"
+          }
+        ]
+      ],
+      "color": "#d97706",
+      "active": true
+    },
+    {
+      "name": "Rafael Jiménez",
+      "aliases": [
+        "rafa",
+        "rafi"
+      ],
+      "specialties": [
+        "fade",
+        "barba"
+      ],
+      "schedule": [
+        [],
+        [],
+        [
+          {
+            "start": "09:00",
+            "end": "12:00"
+          },
+          {
+            "start": "13:00",
+            "end": "19:00"
+          }
+        ],
+        [],
+        [
+          {
+            "start": "09:00",
+            "end": "12:00"
+          },
+          {
+            "start": "13:00",
+            "end": "19:00"
+          }
+        ],
+        [
+          {
+            "start": "09:00",
+            "end": "12:00"
+          },
+          {
+            "start": "13:00",
+            "end": "19:00"
+          }
+        ],
+        [
+          {
+            "start": "08:00",
+            "end": "13:00"
+          },
+          {
+            "start": "14:00",
+            "end": "19:00"
+          }
+        ]
+      ],
+      "color": "#7c3aed",
+      "active": true
+    },
+    {
+      "name": "Andrea Castillo",
+      "aliases": [
+        "andre"
+      ],
+      "specialties": [
+        "color",
+        "clasico",
+        "ninos"
+      ],
+      "schedule": [
+        [],
+        [],
+        [
+          {
+            "start": "09:00",
+            "end": "13:00"
+          },
+          {
+            "start": "14:00",
+            "end": "19:00"
+          }
+        ],
+        [
+          {
+            "start": "09:00",
+            "end": "13:00"
+          },
+          {
+            "start": "14:00",
+            "end": "19:00"
+          }
+        ],
+        [
+          {
+            "start": "09:00",
+            "end": "13:00"
+          },
+          {
+            "start": "14:00",
+            "end": "19:00"
+          }
+        ],
+        [
+          {
+            "start": "09:00",
+            "end": "13:00"
+          },
+          {
+            "start": "14:00",
+            "end": "19:00"
+          }
+        ],
+        [
+          {
+            "start": "08:00",
+            "end": "13:00"
+          },
+          {
+            "start": "14:00",
+            "end": "19:00"
+          }
+        ]
+      ],
+      "color": "#db2777",
+      "active": true
+    }
+  ],
+  "services": [
+    {
+      "name": "Fade / degradado",
+      "category": "corte",
+      "durationMinutes": 45,
+      "bufferMinutes": 0,
+      "price": 700,
+      "requiredSpecialties": [
+        "fade"
+      ],
+      "defaultCycleDays": 21,
+      "keywords": [
+        "fade",
+        "degradado",
+        "desvanecido",
+        "taper",
+        "low fade",
+        "mid fade",
+        "high fade"
+      ],
+      "active": true
+    },
+    {
+      "name": "Corte clásico",
+      "category": "corte",
+      "durationMinutes": 30,
+      "bufferMinutes": 0,
+      "price": 500,
+      "requiredSpecialties": [
+        "clasico"
+      ],
+      "defaultCycleDays": 28,
+      "keywords": [
+        "corte",
+        "recorte",
+        "pelarme",
+        "pelada",
+        "pelado",
+        "cortarme el pelo",
+        "cortar el pelo",
+        "cortarme"
+      ],
+      "active": true
+    },
+    {
+      "name": "Corte + barba",
+      "category": "corte",
+      "durationMinutes": 60,
+      "bufferMinutes": 0,
+      "price": 1000,
+      "requiredSpecialties": [
+        "clasico",
+        "barba"
+      ],
+      "defaultCycleDays": 21,
+      "keywords": [
+        "corte y barba",
+        "pelo y barba",
+        "combo",
+        "corte con barba"
+      ],
+      "active": true
+    },
+    {
+      "name": "Arreglo de barba",
+      "category": "barba",
+      "durationMinutes": 30,
+      "bufferMinutes": 0,
+      "price": 400,
+      "requiredSpecialties": [
+        "barba"
+      ],
+      "defaultCycleDays": 14,
+      "keywords": [
+        "barba",
+        "perfilado",
+        "perfilar",
+        "afeitar",
+        "afeitada",
+        "rasurar"
+      ],
+      "active": true
+    },
+    {
+      "name": "Corte de niño",
+      "category": "corte",
+      "durationMinutes": 30,
+      "bufferMinutes": 0,
+      "price": 400,
+      "requiredSpecialties": [
+        "ninos"
+      ],
+      "defaultCycleDays": 30,
+      "keywords": [
+        "niño",
+        "nino",
+        "niña",
+        "nina",
+        "mi hijo",
+        "mi hija",
+        "el niño",
+        "el chamaco",
+        "chiquito"
+      ],
+      "active": true
+    },
+    {
+      "name": "Color / tinte",
+      "category": "color",
+      "durationMinutes": 90,
+      "bufferMinutes": 0,
+      "price": 1800,
+      "requiredSpecialties": [
+        "color"
+      ],
+      "defaultCycleDays": 42,
+      "keywords": [
+        "color",
+        "tinte",
+        "teñir",
+        "tenir",
+        "mechas",
+        "rayitos",
+        "pintarme el pelo",
+        "canas"
+      ],
+      "active": true
+    }
+  ]
+}

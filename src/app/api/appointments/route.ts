@@ -2,7 +2,6 @@ import { z } from "zod";
 import { idSchema, instantSchema, phoneSchema } from "@/domain/model";
 import { normalizePhone } from "@/domain/text";
 import { toIso } from "@/domain/time";
-import { getContainer } from "@/lib/container";
 import { HttpError, json, parseBody, salonRoute } from "@/lib/http";
 import { bookAppointment } from "@/services/booking";
 
@@ -18,8 +17,7 @@ const bodySchema = z.object({
 });
 
 /** Reserva hecha desde el salón (recepción o el propio barbero). */
-export const POST = salonRoute(async (request: Request) => {
-  const { ctx } = getContainer();
+export const POST = salonRoute(async ({ ctx }, request: Request) => {
   const body = await parseBody(request, bodySchema);
   let clientId = body.clientId;
   if (!clientId) {

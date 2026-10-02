@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { phoneSchema } from "@/domain/model";
-import { getContainer } from "@/lib/container";
+import { demoScope } from "@/lib/container";
 import { json, parseBody, requireDemo, route } from "@/lib/http";
 import { simulateInbound } from "@/services/demo-script";
 
@@ -12,6 +12,6 @@ const bodySchema = z.object({ phone: phoneSchema, text: z.string().min(1).max(50
 export const POST = route(async (request: Request) => {
   requireDemo();
   const body = await parseBody(request, bodySchema);
-  const result = await simulateInbound(getContainer().ctx, body.phone, body.text, body.profileName);
+  const result = await simulateInbound((await demoScope()).ctx, body.phone, body.text, body.profileName);
   return json({ replies: result.replies, intent: result.interpretation?.intent ?? null, confidence: result.interpretation?.confidence ?? null });
 });

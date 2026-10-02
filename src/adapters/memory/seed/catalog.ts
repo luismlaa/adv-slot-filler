@@ -10,6 +10,8 @@ export const demoSalon: Salon = {
   currency: "DOP",
   phone: "+18095550100",
   address: "Av. Abraham Lincoln 1003, Piantini, Santo Domingo",
+  slug: "el-clasico",
+  active: true,
   settings: {},
 };
 

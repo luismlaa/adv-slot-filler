@@ -14,7 +14,7 @@ export interface ContractFixture {
 export function contractFixture(salonId: string): ContractFixture {
   const day = [{ start: "09:00", end: "19:00" }];
   return {
-    salon: { id: salonId, name: "Salón de contrato", timezone: "America/Santo_Domingo", currency: "DOP", settings: {} },
+    salon: { id: salonId, name: "Salón de contrato", timezone: "America/Santo_Domingo", currency: "DOP", slug: salonId, active: true, settings: {} },
     specialties: [{ id: "fade", name: "Fade" }],
     staff: [
       {

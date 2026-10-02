@@ -1,7 +1,7 @@
 /**
  * Carga el salón de demo en Supabase (local o staging) para probar DATA_BACKEND=supabase.
  * Uso: NEXT_PUBLIC_SUPABASE_URL=… SUPABASE_SERVICE_ROLE_KEY=… npx tsx scripts/seed-supabase.ts
- * Luego: SALON_ID=salon-el-clasico DATA_BACKEND=supabase npm run dev
+ * Luego: DATA_BACKEND=supabase npm run dev, e invita a tu usuario como miembro (npm run salon:create lo hace).
  */
 import { seedDemo } from "@/adapters/memory/seed";
 import { createServiceClient } from "@/adapters/supabase/client";
@@ -36,7 +36,7 @@ async function main() {
     }
     console.log(`✓ ${table}: ${rows.length}`);
   }
-  console.log(`Listo. SALON_ID=${salonId}`);
+  console.log(`Listo. Salón ${salonId} (${data.salon.slug}).`);
 }
 
 main().catch((error) => {
