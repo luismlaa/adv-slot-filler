@@ -1,12 +1,14 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "slot-filler",
+  // Entorno por defecto = desarrollo/preview (`npm run cf:preview`). Staging y producción abajo.
+  "name": "slot-filler-dev",
   "main": ".open-next/worker.js",
   "compatibility_date": "2026-10-01",
   "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
   "assets": { "directory": ".open-next/assets", "binding": "ASSETS" },
-  "services": [{ "binding": "WORKER_SELF_REFERENCE", "service": "slot-filler" }],
-  // Variables no secretas. Los secretos se cargan con `npx wrangler secret put NOMBRE` (fase D1).
+  "services": [{ "binding": "WORKER_SELF_REFERENCE", "service": "slot-filler-dev" }],
+  "observability": { "enabled": true },
+  // Variables no secretas. Los secretos se cargan por entorno: `npx wrangler secret put NOMBRE --env staging`.
   "vars": {
     "DATA_BACKEND": "supabase",
     "DEMO_MODE": "false",
@@ -14,5 +16,39 @@
     "MESSAGING_CHANNEL": "simulator",
     "CALENDAR_PROVIDER": "fake",
     "LLM_PROVIDER": "rules"
+  },
+  "env": {
+    // Staging: mismo código, Supabase propio, WhatsApp en dry-run. Se despliega en cada merge a main.
+    "staging": {
+      "name": "slot-filler-staging",
+      "services": [{ "binding": "WORKER_SELF_REFERENCE", "service": "slot-filler-staging" }],
+      "observability": { "enabled": true },
+      "vars": {
+        "DATA_BACKEND": "supabase",
+        "DEMO_MODE": "false",
+        "NEXT_PUBLIC_LIVE_TRANSPORT": "supabase",
+        "MESSAGING_CHANNEL": "simulator",
+        "MESSAGING_DRY_RUN": "true",
+        "CALENDAR_PROVIDER": "fake",
+        "LLM_PROVIDER": "rules",
+        "LOG_LEVEL": "debug"
+      }
+    },
+    // Producción: se despliega solo a mano (workflow "Deploy" con aprobación). Las fases D2–D4 cambian
+    // MESSAGING_CHANNEL / CALENDAR_PROVIDER / LLM_PROVIDER aquí, con aprobación del dueño.
+    "production": {
+      "name": "slot-filler",
+      "services": [{ "binding": "WORKER_SELF_REFERENCE", "service": "slot-filler" }],
+      "observability": { "enabled": true },
+      "vars": {
+        "DATA_BACKEND": "supabase",
+        "DEMO_MODE": "false",
+        "NEXT_PUBLIC_LIVE_TRANSPORT": "supabase",
+        "MESSAGING_CHANNEL": "simulator",
+        "CALENDAR_PROVIDER": "fake",
+        "LLM_PROVIDER": "rules",
+        "LOG_LEVEL": "info"
+      }
+    }
   }
 }

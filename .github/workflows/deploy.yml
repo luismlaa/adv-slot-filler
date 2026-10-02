@@ -1,0 +1,63 @@
+name: Deploy
+
+# Staging: en cada push a main (después de que CI pase en el PR).
+# Producción: solo a mano (Actions → Deploy → Run workflow → production). Configura "Required
+# reviewers" en el environment `production` de GitHub para que pida aprobación.
+# No hace nada hasta que la variable de repositorio DEPLOY_ENABLED sea "true" (fase D1).
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      target:
+        description: Entorno
+        type: choice
+        options: [staging, production]
+        default: staging
+
+concurrency:
+  group: deploy-${{ github.event.inputs.target || 'staging' }}
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    if: vars.DEPLOY_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment: ${{ github.event.inputs.target || 'staging' }}
+    env:
+      TARGET: ${{ github.event.inputs.target || 'staging' }}
+      # Las NEXT_PUBLIC_* se incrustan en el bundle del navegador: deben existir en el build.
+      NEXT_PUBLIC_SUPABASE_URL: ${{ vars.NEXT_PUBLIC_SUPABASE_URL }}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ vars.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+      NEXT_PUBLIC_LIVE_TRANSPORT: supabase
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run check
+
+      - name: Migraciones de base de datos
+        run: npx supabase db push --db-url "${{ secrets.SUPABASE_DB_URL }}" --include-all
+
+      - name: Tests del adaptador Supabase contra este entorno
+        if: env.TARGET == 'staging'
+        run: npm run test:integration
+        env:
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+
+      - name: Build y deploy a Cloudflare Workers
+        run: npm run cf:deploy:${{ env.TARGET }}
+
+      - name: Smoke test
+        run: |
+          for i in 1 2 3 4 5 6; do
+            body=$(curl -fsS "${{ vars.APP_URL }}/api/health") && echo "$body" && echo "$body" | grep -q '"backend":"supabase"' && exit 0
+            sleep 10
+          done
+          echo "El healthcheck no respondió bien" && exit 1

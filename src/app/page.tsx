@@ -10,6 +10,14 @@ export default function Home() {
       <Link className="rounded-lg bg-neutral-900 px-4 py-2 text-white" href="/demo">
         Abrir demo
       </Link>
+      <nav className="flex gap-4 text-sm text-neutral-500" aria-label="Legal">
+        <Link href="/privacidad" className="hover:underline">
+          Privacidad
+        </Link>
+        <Link href="/terminos" className="hover:underline">
+          Términos
+        </Link>
+      </nav>
     </main>
   );
 }

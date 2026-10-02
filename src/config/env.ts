@@ -15,6 +15,9 @@ export const envSchema = z
     NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
     APP_URL: z.url().default("http://localhost:3000"),
     LOG_LEVEL: z.enum(["debug", "info", "warn", "error"]).default("info"),
+    /** Operador del servicio, para las páginas legales (/privacidad, /terminos). */
+    LEGAL_ENTITY_NAME: optionalString,
+    LEGAL_CONTACT_EMAIL: optionalString,
 
     DEMO_MODE: flag,
     DATA_BACKEND: z.enum(["memory", "supabase"]).default("memory"),

@@ -88,4 +88,10 @@ Modo: single-instance. Ramas apiladas por fase; merge humano en orden.
 - [x] Migración (slug, active, whatsapp_phone_number_id) + `salon:create` + test de aislamiento
 
 ## PR3 — Infra de deploy · `chore/deploy-readiness`
-- [ ] Entornos staging/prod, CD, observabilidad, backups, páginas legales, runbook
+- [x] Entornos staging/prod, CD, observabilidad, backups, páginas legales, runbook
+
+## Review (2026-10-03)
+- PR1: `/demo` → producto real. `/chat` estilo WhatsApp, panel oculto del presentador, intents de precios/horario/ubicación, tope diario de Claude. e2e reescrito y en verde.
+- PR2: multi-tenant (contexto por salón, directorio, webhooks y crons por salón). Arreglado un hueco de aislamiento: el upsert con service role podía pisar filas de otro salón. Migraciones probadas sobre PGlite.
+- PR3: staging/producción en Wrangler, workflows Deploy y Backup (inactivos hasta `DEPLOY_ENABLED`), cron por salón con Vault, páginas legales (borrador), `client:erase`, runbook reescrito. El build de Workers corre en workerd.
+- Pendiente (necesita cuentas): el adaptador Supabase contra una BD real corre en el primer deploy a staging, más uptime, revisión legal y prueba de restauración.
