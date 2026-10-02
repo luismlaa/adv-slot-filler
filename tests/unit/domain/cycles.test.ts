@@ -112,14 +112,14 @@ describe("analyzeCycles", () => {
     expect(run(appts)[0]!.status).toBe("booked");
   });
 
-  it("el panel 'por volver' excluye a los que ya reservaron y ordena por urgencia", () => {
+  it('el panel "por volver" excluye a los que ya reservaron: primero a quien le toca, luego atrasados', () => {
     const appts = [
       ...visits("due", history("2026-09-04", [28, 28])),
       ...visits("late", history("2026-08-20", [28, 28])),
       ...visits("fine", history("2026-09-25", [28, 28])),
     ];
     const panel = returningThisWeek(run(appts), startOfWeekDate(THURSDAY));
-    expect(panel.map((c) => c.clientId)).toEqual(["late", "due"]);
+    expect(panel.map((c) => c.clientId)).toEqual(["due", "late"]);
   });
 });
 

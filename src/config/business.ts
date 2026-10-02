@@ -70,7 +70,7 @@ export const defaultBusinessConfig: BusinessConfig = businessConfigSchema.parse(
 type DeepPartial<T> = { [K in keyof T]?: T[K] extends object ? DeepPartial<T[K]> : T[K] };
 export type BusinessConfigOverrides = DeepPartial<BusinessConfig>;
 
-function mergeDeep<T>(base: T, overrides: DeepPartial<T> | undefined): T {
+export function mergeDeep<T>(base: T, overrides: DeepPartial<T> | undefined): T {
   if (overrides === undefined) return base;
   const out: Record<string, unknown> = { ...(base as Record<string, unknown>) };
   for (const [key, value] of Object.entries(overrides as Record<string, unknown>)) {
